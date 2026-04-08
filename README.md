@@ -1,10 +1,16 @@
 # 📅 MedTrack: Agenda Overpowered per ISF
 ### *SaaS-Style Progressive Web App (PWA) per Informatori Scientifici del Farmaco*
 
+![MedTrack Banner](icon/medTrackBanner.png)
+
+<div align="center">
+
 ![Versione](https://img.shields.io/badge/Versione-1.0_SaaS-blue)
 ![Stato](https://img.shields.io/badge/Stato-Production--Ready-success)
 ![PWA](https://img.shields.io/badge/PWA-Installable-purple)
 ![Stack](https://img.shields.io/badge/Stack-Vanilla_JS--Supabase--PostgreSQL-orange)
+
+</div>
 
 **MedTrack (Agenda Overpowered)** è una soluzione digitale avanzata progettata specificamente per centralizzare la gestione dei medici, pianificare le visite e monitorare i target di contatto. Strutturata come una SPA (Single Page Application) e configurata come **PWA (Progressive Web App)**, offre l'esperienza fluida di un software SaaS professionale, ottimizzata per l'uso nativo su smartphone (iOS/Android) e supportata da un solido backend relazionale.
 

@@ -21,6 +21,7 @@ let modalTargetId = null;           // ID dell'oggetto target della modifica
 let modalTargetOldDate = null;      // Data originale prima di uno spostamento
 
 
+
 /* 
 AA 2: INIZIALIZZAZIONE E GESTIONE VISTE (SPA LOGIC)
 */
