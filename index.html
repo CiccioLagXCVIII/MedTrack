@@ -1,0 +1,335 @@
+<!-- index.html (Versione Pulita) -->
+<!DOCTYPE html>
+<html lang="it">
+
+    <head>
+        <!-- AA 1: META TAGS ESSENZIALI -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>MedTrack | Professional ISF Agenda</title>
+
+        <!-- AA 2: CONFIGURAZIONE PWA E MOBILE (iOS & Android) -->
+        <!-- BB 2.1: Colore Tema E Manifest -->
+        <meta name="theme-color" content="#bf4f8a">
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="manifest" href="manifest.json">
+
+        <!-- BB 2.2: Ottimizzazione Specifica Per iPhone -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="MedTrack">
+        <link rel="apple-touch-icon" href="icon/siteLogo.png">
+
+        <!-- BB 2.3: Icone Scheda Browser -->
+        <link rel="icon" type="image/png" href="icon/siteIcon.png">
+
+        <!-- AA 3: STILI E FONT (CSS) -->
+        <!-- BB 3.1: Bootstrap 5 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <!-- BB 3.2: Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet">
+        <!-- BB 3.3: Stile Custom -->
+        <link rel="stylesheet" href="style.css">
+
+        <!-- AA 4: LIBRERIE ESTERNE (JS) -->
+        <!-- BB 4.1: Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+        <!-- BB 4.2: Day.js (Date & Localizzazione) -->
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/it.js"></script>
+        <!-- BB 4.3: Supabase & Lucid Icon -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+
+        <!-- AA 5: LOGICA APPLICATIVA E PWA MANAGER -->
+        <!-- CC 5.1: Configurazione, Auth e Core Logic -->
+        <script src="config.js" defer></script>
+        <script src="auth.js" defer></script>
+        <script src="script.js" defer></script>
+        <!-- CC 5.2: Gestione Installazione PWA (Service Worker) -->
+        <script src="pwaManager.js" defer></script>
+    </head>
+
+    <body>
+        <div id="main-app">
+
+            <!-- NAVBAR -->
+            <nav class="navbar navbar-expand bg-white shadow-sm sticky-top border-bottom py-2">
+                <div class="container px-3">
+                    <a class="navbar-brand d-flex align-items-center gap-2" href="#"
+                        onclick="showView('calendar-view')">
+                        <img src="icon/siteLogo.png" alt="Logo" class="logo-nav">
+                        <span class="fw-bolder d-none d-sm-inline">MedTrack</span>
+                    </a>
+
+                    <div class="d-flex gap-1 bg-light p-1 rounded-pill border shadow-sm">
+                        <button class="btn nav-btn-custom active py-2 px-3 px-md-4" onclick="showView('calendar-view')"
+                            id="nav-btn-cal">
+                            <i data-lucide="calendar" class="icon-nav"></i>
+                            <span class="d-none d-md-inline text-uppercase small fw-bold">Calendario</span>
+                        </button>
+                        <button class="btn nav-btn-custom py-2 px-3 px-md-4" onclick="showView('clients-view')"
+                            id="nav-btn-cli">
+                            <i data-lucide="users" class="icon-nav"></i>
+                            <span class="d-none d-md-inline text-uppercase small fw-bold">Medici</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid py-3 flex-grow-1">
+
+                <!-- AA VISTA CALENDARIO -->
+                <div id="calendar-view" class="view active">
+                    <!-- Header compatto -->
+                    <div
+                        class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 shadow-sm border mb-4">
+                        <button class="btn btn-light" onclick="changeMonth(-1)">
+                            <i data-lucide="chevron-left" class="icon-sm"></i>
+                        </button>
+
+                        <h2 id="month-year" class="h4 mb-0 text-uppercase"></h2>
+
+                        <button class="btn btn-light" onclick="changeMonth(1)">
+                            <i data-lucide="chevron-right" class="icon-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Griglia che si espande -->
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+
+                <!-- AA VISTA GIORNO -->
+                <div id="day-view" class="view">
+                    <button
+                        class="btn btn-outline-secondary mb-3 d-flex align-items-center gap-2 rounded-pill px-3 shadow-sm"
+                        onclick="showView('calendar-view')">
+                        <i data-lucide="arrow-left" class="icon-md"></i>
+                        <span class="fw-bold small">Torna al Calendario</span>
+                    </button>
+
+                    <h2 id="selected-date-title" class="h4 fw-bold mb-4 text-dark px-1"></h2>
+
+                    <!-- FORM INSERIMENTO -->
+                    <div class="card border-custom-glow shadow-sm rounded-4 mb-5 overflow-hidden">
+
+                        <!-- HEADER TABS (Orario / Liberi) -->
+                        <div class="p-3 p-md-4 bg-white border-0">
+                            <div class="segmented-control theme-indigo">
+                                <button class="segmented-btn active" id="tab-scheduled" onclick="setTab('scheduled')">
+                                    <i data-lucide="clock" class="icon-sm"></i> <span>Orario</span>
+                                </button>
+                                <button class="segmented-btn" id="tab-walkin" onclick="setTab('walkin')">
+                                    <i data-lucide="calendar-days" class="icon-sm"></i> <span>Liberi</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- BODY DEL FORM -->
+                        <div class="card-body px-3 px-md-4 pt-0 pb-4">
+
+                            <!-- TABS INTERNI (Nuovo / Lista) -->
+                            <div class="segmented-control theme-teal mb-4">
+                                <input type="radio" name="clientType" id="type-new" value="new" checked
+                                    onchange="toggleClientInput()" class="d-none">
+                                <label class="segmented-btn" for="type-new"><i data-lucide="user-plus"
+                                        class="icon-sm"></i> Nuovo</label>
+
+                                <input type="radio" name="clientType" id="type-existing" value="existing"
+                                    onchange="toggleClientInput()" class="d-none">
+                                <label class="segmented-btn" for="type-existing"><i data-lucide="list"
+                                        class="icon-sm"></i> Lista</label>
+                            </div>
+
+                            <!-- CONTENITORE UNICO FLEXBOX: Garantisce che lo spazio verticale tra TUTTI i campi sia sempre identico (gap-3) -->
+                            <div class="d-flex flex-column gap-3">
+
+                                <!-- GRUPPO NUOVO MEDICO -->
+                                <div id="new-client-div" class="d-flex flex-column gap-3 w-100">
+
+                                    <!-- Riga 1: Nome -->
+                                    <input type="text" id="new-client-name" class="form-control"
+                                        placeholder="Nome Medico">
+
+                                    <!-- Riga 2: Città e Indirizzo (Smezzati perfetti al 50% con spazio in mezzo) -->
+                                    <div class="d-flex gap-2 w-100">
+                                        <input type="text" id="new-client-city" class="form-control w-50"
+                                            placeholder="Città">
+                                        <input type="text" id="new-client-address" class="form-control w-50"
+                                            placeholder="Indirizzo">
+                                    </div>
+
+                                    <!-- Riga 3: Cellulare -->
+                                    <input type="tel" id="new-client-phone" class="form-control"
+                                        placeholder="Cellulare">
+
+                                    <!-- Riga 4: Specializzazione Dinamica (Smezza al 50% solo se si clicca "+ Altro") -->
+                                    <div class="d-flex gap-2 w-100">
+                                        <select id="new-client-spec" class="form-select w-100"
+                                            onchange="checkOtherSpec(this)" required></select>
+                                        <input type="text" id="custom-spec-input" class="form-control w-50 display-none"
+                                            placeholder="Specifica Specializzazione...">
+                                    </div>
+
+                                </div>
+
+                                <!-- GRUPPO MEDICO ESISTENTE (Nascosto Di Default) -->
+                                <div id="existing-client-div" class="display-none w-100">
+                                    <select id="existing-client-select" class="form-select w-100"></select>
+                                </div>
+
+                                <!-- GRUPPO ORARIO -->
+                                <div id="time-group" class="w-100 d-flex justify-content-center pt-2">
+                                    <input type="time" id="appointment-time" class="form-control text-center w-50"
+                                        style="font-size: 1.1rem;" required>
+                                </div>
+
+                                <!-- GRUPPO GIORNI LIBERI (Nascosto Di Default) -->
+                                <div id="days-group" class="w-100 display-none">
+                                    <div class="btn-group w-100 d-flex gap-1" id="available-days-checkboxes"
+                                        role="group">
+                                        <input type="checkbox" class="btn-check" id="day-1" value="1"><label
+                                            class="btn btn-outline-primary btn-sm flex-fill fw-bold"
+                                            for="day-1">L</label>
+                                        <input type="checkbox" class="btn-check" id="day-2" value="2"><label
+                                            class="btn btn-outline-primary btn-sm flex-fill fw-bold"
+                                            for="day-2">M</label>
+                                        <input type="checkbox" class="btn-check" id="day-3" value="3"><label
+                                            class="btn btn-outline-primary btn-sm flex-fill fw-bold"
+                                            for="day-3">M</label>
+                                        <input type="checkbox" class="btn-check" id="day-4" value="4"><label
+                                            class="btn btn-outline-primary btn-sm flex-fill fw-bold"
+                                            for="day-4">G</label>
+                                        <input type="checkbox" class="btn-check" id="day-5" value="5"><label
+                                            class="btn btn-outline-primary btn-sm flex-fill fw-bold"
+                                            for="day-5">V</label>
+                                    </div>
+                                </div>
+
+                                <!-- BOTTONE SALVA -->
+                                <button class="btn btn-primary fw-bold w-100 py-2 mt-2"
+                                    onclick="addAppointment()">Aggiungi Appuntamento</button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LISTE -->
+                    <div id="mobile-list-selector" class="d-md-none mb-3">
+                        <div class="segmented-control theme-indigo">
+                            <button class="segmented-btn active" id="btn-show-scheduled"
+                                onclick="toggleMobileListView('scheduled')">
+                                <i data-lucide="clock" class="icon-sm"></i> Appuntamenti
+                            </button>
+                            <button class="segmented-btn" id="btn-show-walkins"
+                                onclick="toggleMobileListView('walkins')">
+                                <i data-lucide="unlock" class="icon-sm"></i> Liberi
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6" id="col-scheduled">
+                            <h3
+                                class="h6 fw-bold text-secondary text-uppercase mb-3 d-none d-md-flex align-items-center gap-2">
+                                <i data-lucide="clock" class="icon-md"></i> Appuntamenti
+                            </h3>
+                            <ul class="list-group" id="scheduled-ul"></ul>
+                        </div>
+
+                        <div class="col-md-6" id="col-walkins">
+                            <h3
+                                class="h6 fw-bold text-secondary text-uppercase mb-3 d-none d-md-flex align-items-center gap-2">
+                                <i data-lucide="unlock" class="icon-md"></i> Liberi Oggi
+                            </h3>
+                            <ul class="list-group" id="walkins-ul"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AA VISTA ANAGRAFICA -->
+                <div id="clients-view" class="view">
+                    <!-- SEARCH & FILTER BAR (Sticky su mobile) -->
+                    <div class="sticky-top bg-light pt-2" style="z-index: 100;">
+                        <div class="search-wrapper mb-2">
+                            <div class="search-input-group shadow-sm">
+                                <i data-lucide="search" class="search-icon-inside"></i>
+                                <input type="text" id="search-client" class="form-control" placeholder="Cerca medico..."
+                                    onkeyup="handleSearchInput()">
+                                <button type="button" id="clear-search-btn" class="btn-close clear-icon d-none"
+                                    onclick="clearSearch()"></button>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Filtri Mobile -->
+                        <button
+                            class="btn btn-white border w-100 d-flex justify-content-between align-items-center shadow-sm btn-filter-toggle mt-4 mb-1"
+                            onclick="toggleMobileFilters()">
+                            <span class="fw-bold text-dark"><i data-lucide="sliders-horizontal" class="icon-sm"></i>
+                                Filtri Avanzati</span>
+                            <i data-lucide="chevron-down" id="filter-chevron"></i>
+                        </button>
+
+                        <!-- Pannello Filtri (Hidden by default) -->
+                        <!-- Pannello Filtri -->
+                        <div id="mobile-filter-panel" class="card mt-2 shadow-sm border-0 rounded-4">
+                            <div class="card-body p-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label
+                                            class="form-label text-secondary fw-semibold small text-uppercase">Specializzazione</label>
+                                        <select id="filter-spec" class="form-select"
+                                            onchange="renderClients()"></select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label
+                                            class="form-label text-secondary fw-semibold small text-uppercase">Città</label>
+                                        <select id="filter-city" class="form-select" onchange="renderClients()">
+                                            <option value="all">Tutte</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Pulsanti Radio -->
+                                <div class="d-flex gap-2 mt-3">
+                                    <input type="radio" class="btn-check" name="visitFilter" id="filter-all" value="all"
+                                        checked onchange="renderClients()">
+                                    <label class="btn btn-outline-primary btn-sm flex-fill"
+                                        for="filter-all">Tutti</label>
+
+                                    <input type="radio" class="btn-check" name="visitFilter" id="filter-visited"
+                                        value="visited" onchange="renderClients()">
+                                    <label class="btn btn-outline-primary btn-sm flex-fill"
+                                        for="filter-visited">Visitati</label>
+
+                                    <input type="radio" class="btn-check" name="visitFilter" id="filter-not-visited"
+                                        value="not-visited" onchange="renderClients()">
+                                    <label class="btn btn-outline-primary btn-sm flex-fill" for="filter-not-visited">Mai
+                                        Visitati</label>
+                                </div>
+
+                                <!-- Pulsante Reset Aggiornato -->
+                                <button class="btn btn-reset-custom mt-3" onclick="resetAllFilters()">
+                                    Resetta Tutto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MAIN CONTENT CARDS -->
+                    <div id="clients-container" class="mt-2"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-white text-danger border shadow-sm fw-bold logout-float-btn"
+                onclick="handleLogout()">
+                <i data-lucide="log-out"></i>
+            </button>
+
+        </div>
+
+        <div id="modal-placeholder"></div>
+    </body>
+
+</html>

@@ -1,0 +1,24 @@
+{
+    "name": "MedTrack Professional Agenda For ISF",
+    "short_name": "MedTrack",
+    "description": "Agenda E Gestione Appuntamenti Per Informatori Scientifici",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#bf4f8a",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "icon/siteIcon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon/siteLogo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

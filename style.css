@@ -1,0 +1,1191 @@
+/* ==========================================================================
+   AA SEZIONE 1: CONFIGURAZIONE, VARIABILI E FONT
+   ========================================================================== */
+
+/* BB Root Variables */
+:root {
+    --primary: #ffc0cb;
+    --primary-dark: #f8a5b5;
+    --primary-light: #fff5f7;
+    --brand-color: #bf4f8a;
+
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --info: #3b82f6;
+
+    --bg-app: #ffffff;
+    --bg-white: #ffffff;
+    --text-main: #334155;
+    --text-muted: #94a3b8;
+    --border-color: #fce4e8;
+    --border-light: #f8fafc;
+
+    --shadow-sm: 0 2px 4px rgba(255, 192, 203, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 25px -5px rgba(255, 192, 203, 0.2);
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-pill: 50px;
+
+    --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
+/* BB Imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+
+/* ==========================================================================
+   AA SEZIONE 2: STILI BASE E LAYOUT GLOBALE
+   ========================================================================== */
+
+/* BB Reset e Body */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    color: var(--text-main);
+    overscroll-behavior-y: contain;
+    user-select: none;
+}
+
+/* BB Layout Bootstrap Overrides */
+.row {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+.container,
+.container-fluid {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+}
+
+/* BB Gestione Viste (SPA) */
+.view {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+input,
+textarea {
+    user-select: text;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 3: COMPONENTI INTERFACCIA (UI) E FORM
+   ========================================================================== */
+
+/* BB Bottoni Universali */
+/* CC Bottoni Primari */
+.btn-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #4a5568 !important;
+}
+
+.btn-primary.w-100 {
+    border: none !important;
+    font-weight: 800;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark) !important;
+}
+
+/* CC Bottoni Outline */
+.btn-outline-primary {
+    border: 1.5px solid var(--primary) !important;
+    color: var(--primary-dark) !important;
+    background-color: transparent !important;
+    font-weight: 600;
+}
+
+.btn-outline-secondary {
+    border: 1.5px solid var(--primary) !important;
+    color: var(--primary-dark) !important;
+    background-color: transparent !important;
+    font-weight: 600;
+    text-transform: none;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #4a5568 !important;
+    box-shadow: 0 4px 10px rgba(255, 192, 203, 0.2);
+}
+
+.btn-reset-custom {
+    color: var(--primary-dark) !important;
+    border: 1.5px solid var(--primary) !important;
+    background-color: transparent !important;
+    transition: all 0.3s ease;
+    padding: 6px 12px;
+    border-radius: 8px;
+    width: 100%;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.btn-reset-custom:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+/* BB Segmented Controls (Pill Tabs) */
+.segmented-control {
+    display: flex !important;
+    width: 100% !important;
+    overflow: hidden;
+    background: transparent;
+    border-radius: var(--radius-md);
+    gap: 12px;
+}
+
+.segmented-btn {
+    flex: 1;
+    border: 1.5px solid #dee2e6 !important;
+    background: var(--bg-app);
+    padding: 10px 4px !important;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.8rem !important;
+    color: #6c757d !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+/* CC Varianti Colore Segmented */
+.theme-indigo .segmented-btn.active {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #4a5568 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.theme-teal .segmented-btn {
+    color: var(--teal);
+    background: var(--teal-light);
+}
+
+input[type="radio"]:checked+.segmented-btn {
+    background-color: #FF9BB3 !important;
+    border-color: #FF9BB3 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+/* BB Elementi Form e Input */
+/* CC Input Standard e Select */
+.form-control::placeholder {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.form-select {
+    border: 1.5px solid var(--primary) !important;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: var(--primary-dark) !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 192, 203, 0.25) !important;
+}
+
+select.form-select:invalid {
+    color: #94a3b8 !important;
+}
+
+select.form-select option {
+    color: var(--text-main);
+}
+
+input[type="time"]:invalid {
+    color: #94a3b8 !important;
+}
+
+input[type="time"]:valid {
+    color: var(--text-main) !important;
+    font-weight: 600;
+}
+
+/* CC Checkbox State */
+.btn-check:checked+.btn-outline-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #4a5568 !important;
+    box-shadow: none !important;
+}
+
+#available-days-checkboxes .btn-outline-primary {
+    border-width: 1.5px;
+}
+
+.form-check-input {
+    cursor: pointer;
+    border-color: var(--primary) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 4: NAVBAR E NAVIGAZIONE
+   ========================================================================== */
+
+/* BB Barra di Navigazione */
+.navbar {
+    background: #ffffff !important;
+    border-bottom: 2px solid var(--primary) !important;
+    padding-top: calc(var(--safe-area-top) + 0.5rem) !important;
+}
+
+.logo-nav {
+    width: 50px;
+    height: 50px;
+}
+
+.navbar-brand span {
+    color: var(--brand-color) !important;
+    letter-spacing: -0.5px;
+    background: linear-gradient(45deg, var(--brand-color), #d4418e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* BB Bottoni Navigazione */
+.nav-btn-custom {
+    border: none !important;
+    padding: 8px 20px !important;
+    border-radius: var(--radius-pill) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    color: var(--secondary) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background: transparent;
+}
+
+.nav-btn-custom.active {
+    background: var(--primary) !important;
+    color: #4a5568 !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 5: VISTA CALENDARIO
+   ========================================================================== */
+
+/* BB Struttura Calendario */
+#calendar-view.active {
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 115px);
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
+#calendar-view .bg-white.rounded-4.shadow-sm.border {
+    border-radius: 20px !important;
+    padding: 12px 20px !important;
+    border: 1px solid #eef2f6 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 15px !important;
+    flex-shrink: 0;
+    max-width: 850px;
+    width: 100%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* BB Header Mese */
+#month-year {
+    color: var(--primary-dark) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
+}
+
+#calendar-view .btn-light {
+    background-color: var(--bg-app) !important;
+    border-radius: 50% !important;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    color: var(--secondary) !important;
+    border: none !important;
+    transition: all 0.2s;
+}
+
+#calendar-view .btn-light:hover {
+    background-color: var(--border-light) !important;
+    color: var(--primary) !important;
+}
+
+/* BB Griglia Giorni */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: 25px repeat(6, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 850px;
+    height: 100%;
+    margin: 0 auto;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+/* CC Intestazione Giorni */
+.day-name {
+    text-align: center;
+    font-weight: 700;
+    padding: 10px 0 !important;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+
+.day-name:nth-child(6) {
+    color: #fd7e14;
+}
+
+.day-name:nth-child(7) {
+    color: var(--danger);
+}
+
+/* CC Celle Giorno */
+.day {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.day:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    z-index: 2;
+}
+
+.day.sat {
+    color: #fd7e14 !important;
+}
+
+.day.sun {
+    color: var(--danger) !important;
+}
+
+.day.today {
+    background-color: var(--primary-light) !important;
+    border: 2px solid var(--primary) !important;
+    color: var(--text-main) !important;
+}
+
+/* CC Badge Notifica Calendario */
+.day .badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background-color: var(--primary-dark) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(248, 165, 181, 0.4);
+    top: auto;
+    right: auto;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 6: VISTA GIORNO E APPUNTAMENTI
+   ========================================================================== */
+
+/* BB Struttura Day View */
+#day-view {
+    max-width: 950px;
+}
+
+#day-view .card.border-custom-glow {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border: none;
+    box-shadow: var(--shadow-md);
+}
+
+#day-view .form-control,
+#day-view .form-select {
+    border: 1.5px solid #dee2e6 !important;
+    transition: all 0.2s ease;
+}
+
+#day-view .form-control:focus,
+#day-view .form-select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(255, 192, 203, 0.25) !important;
+}
+
+/* BB Liste Appuntamenti */
+#scheduled-ul,
+#walkins-ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* CC Elemento Appuntamento (Card) */
+.appointment-item {
+    background: var(--bg-white);
+    border: 1px solid #edf2f7;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease;
+}
+
+.appointment-item:hover {
+    transform: translateY(-2px);
+}
+
+/* CC Info e Testi Liste */
+.list-info {
+    margin-bottom: 12px;
+}
+
+.list-info .fw-bold.text-primary {
+    color: #2563eb !important;
+    font-size: 1.15rem;
+}
+
+.list-info .text-dark {
+    color: #1e293b !important;
+    font-size: 1.15rem;
+}
+
+.list-info .text-secondary {
+    color: #94a3b8 !important;
+    font-weight: 500;
+}
+
+.note-preview {
+    font-size: 0.85rem;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 12px 0;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+}
+
+/* BB Azioni Rapide (Bottoni Liste) */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.btn-action-main {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: white !important;
+}
+
+.btn-danger.btn-action-main {
+    background-color: #dc2626 !important;
+}
+
+.btn-success.btn-action-main {
+    background-color: #059669 !important;
+}
+
+/* CC Bottoni Pillola (Navigazione/Telefono) */
+.btn-action-pill {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.btn-action-pill i {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-map {
+    border: 1px solid #cbd5e1;
+    color: #2563eb;
+}
+
+.btn-map:hover {
+    background: #e2e8f0;
+    color: #1d4ed8;
+}
+
+.btn-phone {
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.btn-phone:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-wa {
+    border: 1px solid #bbf7d0;
+    color: #16a34a;
+    background: #f0fdf4;
+}
+
+.btn-wa:hover {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 7: ANAGRAFICA MEDICI (CLIENTS VIEW)
+   ========================================================================== */
+
+/* BB Struttura Anagrafica */
+#clients-view {
+    max-width: 1300px;
+}
+
+#clients-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    width: 100%;
+    align-items: start;
+}
+
+/* BB Card Medico */
+.client-card {
+    background: var(--bg-white);
+    border: 1px solid #f1f5f9;
+    border-radius: 24px;
+    padding: 24px;
+    border-top-width: 6px;
+    border-top-style: solid;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.client-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.client-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+/* CC Elementi Card */
+.client-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: #f1f5f9;
+    color: #3b82f6;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    align-self: flex-start;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.client-info {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.last-visit-box {
+    background: transparent;
+    padding: 15px 0 0 0;
+    margin-top: 15px;
+    border-top: 1px solid #f1f5f9;
+    flex-grow: 1;
+}
+
+.last-visit-box .client-info {
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.last-visit-box strong {
+    color: #1e293b;
+}
+
+.note-recap {
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #eff6ff;
+}
+
+/* CC Stati Colorati Card (Business Logic) */
+.border-urgent {
+    border-top-color: #ef4444 !important;
+}
+
+.border-warn {
+    border-top-color: #f59e0b !important;
+}
+
+.border-ok {
+    border-top-color: #10b981 !important;
+}
+
+.border-neutral {
+    border-top-color: #3b82f6 !important;
+}
+
+/* BB Azioni Card */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-small {
+    padding: 10px 5px;
+    font-size: 0.75rem;
+    border-radius: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: white !important;
+    transition: filter 0.2s;
+}
+
+.btn-small:hover {
+    filter: brightness(1.1);
+}
+
+.btn-edit {
+    background-color: #2563eb;
+}
+
+.btn-undo {
+    background-color: #64748b;
+}
+
+.btn-delete {
+    background-color: #dc2626;
+}
+
+.btn-done {
+    background-color: #059669;
+}
+
+/* BB Filtri e Ricerca Anagrafica */
+.sidebar-sticky {
+    position: sticky;
+    top: 90px;
+    z-index: 100;
+}
+
+.sidebar-sticky h3 i {
+    color: var(--primary-dark);
+}
+
+.search-wrapper {
+    width: 100%;
+}
+
+.search-input-group {
+    position: relative;
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.search-input-group:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px var(--primary-light) !important;
+}
+
+#search-client {
+    height: 50px;
+    padding-left: 50px !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    width: 100%;
+}
+
+#search-client:focus {
+    box-shadow: none !important;
+}
+
+.search-icon-inside {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary);
+    z-index: 5;
+    width: 20px;
+    transition: color 0.3s ease;
+}
+
+.search-input-group:focus-within .search-icon-inside {
+    color: var(--primary);
+}
+
+#mobile-filter-panel .form-select-sm {
+    font-size: 0.85rem;
+    border-radius: 10px;
+    background-color: #f8fafc;
+}
+
+#mobile-filter-panel .btn-check+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+#filter-chevron {
+    transition: transform 0.3s ease;
+    width: 16px;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 8: SISTEMA DI AUTENTICAZIONE (LOGIN)
+   ========================================================================== */
+
+/* BB Layout Login */
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-app);
+    background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+}
+
+.login-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 20px;
+}
+
+.login-card-custom {
+    border-radius: var(--radius-lg) !important;
+    background: var(--bg-white);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* BB Header Login */
+.logo-bg-circle {
+    width: 75px;
+    height: 75px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+}
+
+.logo-login {
+    width: 90px;
+}
+
+.login-label-sm {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+}
+
+/* BB Campi Input Login */
+.login-input-group {
+    background: #fdfdfd;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.login-input-group:focus-within {
+    border-color: var(--primary) !important;
+    background: white;
+    box-shadow: 0 0 0 4px var(--primary-light) !important;
+}
+
+.login-input-group .input-group-text,
+.login-input-group .form-control,
+.login-input-group #toggle-password {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 52px;
+    margin: 0;
+}
+
+.login-input-group:focus-within .icon-login {
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+
+.login-input-group .input-group-text {
+    padding-left: 18px;
+    padding-right: 5px;
+    color: var(--secondary);
+}
+
+.login-input-group .form-control {
+    padding-left: 10px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+#toggle-password {
+    padding-right: 15px;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+#toggle-password:hover {
+    color: var(--primary);
+}
+
+/* BB Bottone Submit Login */
+.btn-login-submit {
+    background: var(--primary) !important;
+    border: none !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.btn-login-submit:hover {
+    background: var(--primary-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25) !important;
+}
+
+
+/* ==========================================================================
+   AA SEZIONE 9: UTILITY E RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* BB Classi Utility */
+.display-none {
+    display: none !important;
+}
+
+.extra-small {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.animate-float {
+    animation: floatIn 0.6s ease-out;
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logout-float-btn {
+    border-radius: var(--radius-md) !important;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    background: var(--bg-white);
+    z-index: 1000;
+    border: 1px solid var(--border-color) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: calc(env(safe-area-inset-bottom, 20px) + 20px) !important;
+}
+
+/* BB Dimensioni Icone */
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-md {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-lg {
+    width: 24px;
+    height: 24px;
+}
+
+
+/* BB Media Queries: Regole Ascendenti (Min-Width / Mobile First) */
+
+@media (min-width: 769px) {
+    .day {
+        min-height: 0;
+    }
+
+    #clients-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .sticky-top {
+        position: static !important;
+    }
+
+    #mobile-filter-panel {
+        display: block !important;
+        position: static;
+        box-shadow: none !important;
+        margin-top: 0 !important;
+        background: transparent !important;
+    }
+
+    .btn-filter-toggle {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1201px) {
+    #clients-container {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+
+/* BB Media Queries: Regole Discendenti (Max-Width / Desktop First) */
+
+@media (max-width: 1200px) {
+    #clients-container {
+        justify-items: start;
+    }
+
+    .client-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 991px) {
+    #filter-panel {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        right: 10px;
+        z-index: 1050;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        background: white;
+    }
+
+    .btn-filter-toggle {
+        display: flex !important;
+    }
+
+    #mobile-filter-panel.display-none {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* CC Calendario Mobile */
+    #calendar-view.active {
+        height: auto;
+        overflow: visible;
+        padding: 0 5px;
+    }
+
+    .calendar-grid {
+        grid-template-rows: auto repeat(6, 60px);
+        gap: 4px;
+        height: auto;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .day {
+        min-height: 60px !important;
+        padding: 6px !important;
+        font-size: 0.85rem;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .day .badge {
+        bottom: 4px;
+        left: 4px;
+        width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+    }
+
+    /* CC Liste e Visibilità Mobile */
+    #col-walkins {
+        display: none;
+    }
+
+    #mobile-list-selector {
+        display: flex !important;
+    }
+
+    #day-view .row.g-4 {
+        flex-direction: column;
+    }
+
+    /* CC Anagrafica Mobile */
+    #clients-container {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    /* CC Fix Selettore Liste Mobile */
+    #mobile-list-selector .segmented-control {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        gap: 10px;
+    }
+
+    #mobile-list-selector .segmented-btn {
+        border-radius: var(--radius-pill) !important;
+        box-shadow: var(--shadow-sm);
+    }
+}
