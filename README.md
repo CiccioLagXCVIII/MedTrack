@@ -66,7 +66,6 @@ Per configurare il tuo ambiente su Supabase:
 5. Clicca su **Run** per creare tabelle, relazioni, la Vista ottimizzata e le policy di sicurezza RLS.
 
 > 💡 **Nota:** Lo script è progettato per essere idempotente; assicuratevi che il database sia vuoto o che non esistano conflitti di nome prima dell'esecuzione se state migrando da una versione precedente.
-```
 
 ### 2. Configurazione Frontend (Protezione API)
 Per connettere l'app al database:
