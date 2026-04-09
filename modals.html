@@ -212,3 +212,67 @@
         </div>
     </div>
 </div>
+
+<!-- MODALE: TASK (Creazione e Modifica) -->
+<div class="modal fade" id="modal-add-task" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="task-modal-title">Nuova Attività</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="task-id-hidden">
+
+                <!-- Selettore Tipo Task (Segmented Control) -->
+                <div class="segmented-control theme-indigo mb-4" id="task-type-selector">
+                    <input type="radio" name="taskType" id="type-call" value="call" onchange="toggleTaskType()"
+                        class="d-none">
+                    <label class="segmented-btn" for="type-call"><i data-lucide="phone" class="icon-sm"></i>
+                        Chiamata</label>
+
+                    <input type="radio" name="taskType" id="type-appt" value="appt" onchange="toggleTaskType()"
+                        class="d-none">
+                    <label class="segmented-btn" for="type-appt"><i data-lucide="calendar" class="icon-sm"></i>
+                        Appuntamento</label>
+
+                    <input type="radio" name="taskType" id="type-gen" value="gen" checked onchange="toggleTaskType()"
+                        class="d-none">
+                    <label class="segmented-btn" for="type-gen"><i data-lucide="align-left" class="icon-sm"></i>
+                        Generica</label>
+                </div>
+
+                <!-- GRUPPO: Titolo e Note (Solo per Generica) -->
+                <div id="task-group-generic" class="mb-3">
+                    <label class="small text-muted mb-1 fw-bold">Titolo Task</label>
+                    <input type="text" id="task-titolo" class="form-control mb-3" placeholder="Titolo Task...">
+
+                    <label class="small text-muted mb-1 fw-bold">Note (Opzionale)</label>
+                    <textarea id="task-note" class="form-control" rows="2"
+                        placeholder="Dettagli Aggiuntivi..."></textarea>
+                </div>
+
+                <!-- GRUPPO: Selettore Medico (Per tutti, ma obbligatorio per Chiamata/Incontro) -->
+                <div id="task-group-medico" class="mb-3">
+                    <label class="small text-muted mb-1 fw-bold" id="label-medico-task">Collega A Medico</label>
+                    <select id="task-medico-link" class="form-select">
+                        <option value="">Nessun Medico Collegato</option>
+                    </select>
+                </div>
+
+                <!-- Priorità (Sempre Visibile) -->
+                <label class="small text-muted mb-1 fw-bold">Priorità</label>
+                <select id="task-priorita" class="form-select mb-2">
+                    <option value="1">Bassa</option>
+                    <option value="2">Media</option>
+                    <option value="3">Alta</option>
+                </select>
+
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annulla</button>
+                <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="saveTask()">Salva Attività</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -51,3 +51,18 @@ SELECT
 FROM medici m;
 
 ALTER VIEW medici_con_stato_visite SET (security_invoker = on);
+
+-- AA Aggiunta Campo Task
+CREATE TABLE tasks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid DEFAULT auth.uid(),
+  titolo TEXT NOT NULL,
+  descrizione TEXT,
+  priorita INTEGER DEFAULT 1, -- 1 Bassa, 2 Media, 3 Alta
+  scadenza DATE,
+  medico_id uuid REFERENCES medici(id) ON DELETE SET NULL, -- Link al medico
+  completato BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "User Access Tasks" ON tasks FOR ALL USING (auth.uid() = user_id);

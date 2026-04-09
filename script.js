@@ -64,16 +64,24 @@ function showView(viewId) {
     // CC Gestione Pulsanti Navbar
     const btnCal = document.getElementById('nav-btn-cal');
     const btnCli = document.getElementById('nav-btn-cli');
+    const btnTsk = document.getElementById('nav-btn-tsk');
 
     if (viewId === 'calendar-view') {
         btnCal.classList.add('active');
         btnCli.classList.remove('active');
+        btnTsk.classList.remove('active');
         loadMonthDataFromSupabase(currentDate);
     } else if (viewId === 'clients-view') {
         btnCli.classList.add('active');
         btnCal.classList.remove('active');
+        btnTsk.classList.remove('active');
         resetAllFilters();
         loadAllDataFromSupabase();
+    } else if (viewId === 'tasks-view') {
+        btnTsk.classList.add('active');
+        btnCal.classList.remove('active');
+        btnCli.classList.remove('active');
+        renderTasks();
     }
 
     // CC Refresh icone Lucide dopo ogni cambio vista
@@ -520,9 +528,255 @@ function clearSearch() {
     renderClients();
 }
 
+/* 
+AA 7: GESTIONE VISTA TASK
+*/
+// BB Apertura Modale Nuovo Task
+async function openAddTaskModal() {
+    if (clientsList.length === 0) {
+        await loadAllDataFromSupabase();
+    }
+
+    const select = document.getElementById('task-medico-link');
+    let html = '<option value="">Nessun Medico Specifico</option>';
+
+    // Ordine alfabetico per facilitare la ricerca
+    const sortedClients = [...clientsList].sort((a, b) => a.name.localeCompare(b.name));
+    sortedClients.forEach(c => {
+        html += `<option value="${c.id}">${escapeHTML(c.name)}</option>`;
+    });
+    select.innerHTML = html;
+
+    // Reset UI
+    document.getElementById('task-id-hidden').value = '';
+    document.getElementById('task-titolo').value = '';
+    document.getElementById('task-note').value = '';
+    document.getElementById('task-priorita').value = '1';
+    document.getElementById('type-gen').checked = true;                             // Default: Generica
+    document.getElementById('task-modal-title').innerText = "Nuova Attività";
+    document.getElementById('task-type-selector').classList.remove('display-none'); // Mostra I Bottoni Di Selezione Tipo Task
+
+    toggleTaskType();
+    openModal('modal-add-task');
+}
+
+// BB Salvataggio Task
+async function saveTask() {
+    const id = document.getElementById('task-id-hidden').value;
+    const type = document.querySelector('input[name="taskType"]:checked').value;
+    const priorita = parseInt(document.getElementById('task-priorita').value);
+    const medico_id = document.getElementById('task-medico-link').value || null;
+
+    let titolo = "";
+    let descrizione = null;
+
+    // Costruzione dinamica in base al tipo
+    if (type === 'gen') {
+        titolo = document.getElementById('task-titolo').value.trim();
+        const noteInput = document.getElementById('task-note').value.trim();
+        if (noteInput) descrizione = noteInput;
+        if (!titolo) return openAlert("Inserisci un titolo per l'attività.");
+    } else {
+        if (!medico_id) return openAlert("Devi Selezionare Un Medico Per Questo Tipo Di Attività");
+        const medico = clientsList.find(c => c.id === medico_id);
+        const nomeMedico = medico ? medico.name : "Medico Sconosciuto";
+
+        if (type === 'call') {
+            titolo = `Chiamare ${nomeMedico}`;
+        } else if (type === 'appt') {
+            titolo = `Prendere Appuntamento Con ${nomeMedico}`;
+        }
+    }
+
+    const payload = { titolo, descrizione, priorita, medico_id };
+
+    if (id) {
+        // Modifica
+        await sb.from('tasks').update(payload).eq('id', id);
+    } else {
+        // Nuovo Inserimento
+        await sb.from('tasks').insert([payload]);
+    }
+
+    closeModal('modal-add-task');
+    renderTasks();
+}
+
+// BB Gestione UI Tipo Task
+function toggleTaskType() {
+    const type = document.querySelector('input[name="taskType"]:checked').value;
+    const groupGeneric = document.getElementById('task-group-generic');
+    const labelMedico = document.getElementById('label-medico-task');
+
+    if (type === 'gen') {
+        // Generica: Mostra Titolo E Note,, Medico Opzionale
+        groupGeneric.classList.remove('display-none');
+        labelMedico.innerText = "Collega A Medico (Opzionale)";
+    } else {
+        // Chiamata / Appuntamento: Nascondi Titolo E Note, Medico Obbligatorio
+        groupGeneric.classList.add('display-none');
+        labelMedico.innerText = type === 'call' ? "Chi Devi Chiamare?" : "Con Chi Devi Prendere Appuntamento?";
+    }
+}
+
+// BB Rendering Task Evoluto (Con Filtri)
+async function renderTasks() {
+    const container = document.getElementById('tasks-container');
+
+    // 1. Fetch dal DB di tutti i task
+    const { data: tasks, error } = await sb.from('tasks').select('*, medici(nome)');
+    if (error) return;
+
+    let filteredTasks = [...tasks];
+
+    // 2. Acquisizione Valori (Con fallback ai valori di default se è selezionato il placeholder)
+    const statusF = document.getElementById('filter-task-status').value || 'todo';
+    const prioF = document.getElementById('sort-task-prio').value || 'desc';
+    const contextF = document.getElementById('filter-task-context').value || 'all';
+
+    // 3. Applicazione Filtro STATO (!t.completato è più sicuro di === false)
+    if (statusF === 'todo') {
+        filteredTasks = filteredTasks.filter(t => !t.completato);
+    }
+
+    // 4. Applicazione Filtro CONTESTO
+    if (contextF === 'medici') {
+        filteredTasks = filteredTasks.filter(t => t.medico_id !== null);
+    } else if (contextF === 'admin') {
+        filteredTasks = filteredTasks.filter(t => t.medico_id === null);
+    }
+
+    // 5. Applicazione Ordinamento PRIORITÀ
+    filteredTasks.sort((a, b) => {
+        if (a.completato !== b.completato) return a.completato ? 1 : -1;
+
+        if (prioF === 'desc') {
+            return b.priorita - a.priorita;
+        } else {
+            return a.priorita - b.priorita;
+        }
+    });
+
+    // 6. Rendering a schermo
+    container.innerHTML = filteredTasks.length ? filteredTasks.map(t => `
+        <div class="task-card ${t.completato ? 'task-done' : ''} task-prio-${t.priorita} shadow-sm">
+            <div class="d-flex align-items-center w-100">
+                
+                <button class="task-checkbox" onclick="toggleTask('${t.id}', ${t.completato})">
+                    <i data-lucide="check" class="check-icon"></i>
+                </button>
+
+                <div class="task-content flex-grow-1 ms-3">
+                    <h6 class="task-title mb-1">${escapeHTML(t.titolo)}</h6>
+                    ${t.descrizione ? `<div class="text-muted small mb-1 fst-italic border-start border-2 ps-2 border-secondary opacity-75">${escapeHTML(t.descrizione)}</div>` : ''}
+                    ${t.medici ? `<div class="task-meta text-primary fw-semibold"><i data-lucide="user" class="icon-xs"></i> ${t.medici.nome}</div>` : ''}
+                </div>
+
+                <div class="task-actions d-flex gap-1 ms-2">
+                    <button class="btn-task-icon text-secondary" onclick="editTask('${t.id}')" title="Modifica">
+                        <i data-lucide="edit-2"></i>
+                    </button>
+                    <button class="btn-task-icon text-danger" onclick="deleteTask('${t.id}')" title="Elimina">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+                
+            </div>
+        </div>
+    `).join('') : `
+        <div class="text-center py-5 mt-2">
+            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3 text-muted">
+                <i data-lucide="smile" style="width: 40px; height: 40px;"></i>
+            </div>
+            <h5 class="text-secondary fw-bold">Nessun Task Qui!</h5>
+            <p class="text-muted small">Cambiando i filtri in alto potresti trovare altre attività.</p>
+        </div>
+    `;
+
+    lucide.createIcons();
+}
+
+// BB Toggle Stato Task
+async function toggleTask(id, attualeStato) {
+    await sb.from('tasks').update({ completato: !attualeStato }).eq('id', id);
+    renderTasks();
+}
+
+// BB Filtri Dinamici Mobile per Task
+function toggleTaskFilters() {
+    const panel = document.getElementById('task-filter-panel');
+    const icon = document.getElementById('task-filter-chevron');
+
+    // Su PC disabilita Il Toggle E Mostra Sempre I Filtri
+    if (window.innerWidth >= 768) return;
+
+    panel.classList.toggle('display-none');
+
+    // Rotazione Icona
+    if (!panel.classList.contains('display-none')) {
+        icon.style.transform = "rotate(180deg)";
+    } else {
+        icon.style.transform = "rotate(0deg)";
+    }
+}
+
+// BB Eliminazione Task
+async function deleteTask(id) {
+    const desc = document.getElementById('modal-confirm-desc');
+    const confirmBtn = document.getElementById('btn-execute-confirm');
+
+    // CC Impostazione Testo Modal
+    desc.innerText = "Vuoi Eliminare Questa Attività? Questa Azione Non Può Essere Annullata.";
+
+    // CC Apre Moda
+    openModal('modal-confirm');
+
+    // CC Assegna Azione Al Bottone Di Conferma
+    confirmBtn.onclick = async () => {
+        // Esegui eliminazione
+        await sb.from('tasks').delete().eq('id', id);
+
+        // CC Chiusura Modal E Refresh Lista
+        closeModal('modal-confirm');
+        renderTasks();
+    };
+}
+
+// BB Modifica Task
+async function editTask(id) {
+    const { data: task } = await sb.from('tasks').select('*').eq('id', id).single();
+    if (!task) return;
+
+    if (clientsList.length === 0) {
+        await loadAllDataFromSupabase();
+    }
+
+    // CC Popola Medici
+    const select = document.getElementById('task-medico-link');
+    let html = '<option value="">Nessun Medico Specifico</option>';
+    clientsList.forEach(c => { html += `<option value="${c.id}">${escapeHTML(c.name)}</option>`; });
+    select.innerHTML = html;
+
+    // CC Riempimento Campi
+    document.getElementById('task-id-hidden').value = task.id;
+    document.getElementById('task-titolo').value = task.titolo;
+    document.getElementById('task-note').value = task.descrizione || '';
+    document.getElementById('task-priorita').value = task.priorita;
+    document.getElementById('task-medico-link').value = task.medico_id || '';
+    document.getElementById('task-modal-title').innerText = "Modifica Attività";
+
+    // CC Forza La UI Su "Generica" Durante Edit
+    // DD Nasconde Selettore Per Non Creare Confusione
+    document.getElementById('type-gen').checked = true;
+    document.getElementById('task-type-selector').classList.add('display-none');
+    toggleTaskType();
+
+    openModal('modal-add-task');
+}
+
 
 /* 
-AA 7: AZIONI E MUTAZIONI DATI (SCRITTURA SUPABASE)
+AA 8: AZIONI E MUTAZIONI DATI (SCRITTURA SUPABASE)
 */
 
 // BB Inserimento Appuntamenti e Medici
@@ -691,7 +945,7 @@ async function confirmTimeModal() {
 
 
 /* 
-AA 8: GESTIONE MODALI E INTERAZIONI ESTERNE
+AA 9: GESTIONE MODALI E INTERAZIONI ESTERNE
 */
 
 // BB Preparazione Modali Modifica/Pianificazione
@@ -759,7 +1013,7 @@ function closeModal(id) {
 }
 
 /* 
-AA 9: UTILITY, FORM HELPERS E SICUREZZA
+AA 10: UTILITY, FORM HELPERS E SICUREZZA
 */
 
 // BB Gestione UI Form (Toggles e Dropdowns)

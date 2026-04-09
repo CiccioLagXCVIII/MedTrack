@@ -63,16 +63,23 @@
                         <span class="fw-bolder d-none d-sm-inline">MedTrack</span>
                     </a>
 
-                    <div class="d-flex gap-1 bg-light p-1 rounded-pill border shadow-sm">
-                        <button class="btn nav-btn-custom active py-2 px-3 px-md-4" onclick="showView('calendar-view')"
-                            id="nav-btn-cal">
+                    <div class="d-flex gap-1 bg-light p-1 rounded-pill border shadow-sm" id="main-nav">
+                        <!-- CALENDARIO -->
+                        <button class="btn nav-btn-custom active" onclick="showView('calendar-view')" id="nav-btn-cal">
                             <i data-lucide="calendar" class="icon-nav"></i>
-                            <span class="d-none d-md-inline text-uppercase small fw-bold">Calendario</span>
+                            <span>CALENDARIO</span>
                         </button>
-                        <button class="btn nav-btn-custom py-2 px-3 px-md-4" onclick="showView('clients-view')"
-                            id="nav-btn-cli">
+
+                        <!-- MEDICI -->
+                        <button class="btn nav-btn-custom" onclick="showView('clients-view')" id="nav-btn-cli">
                             <i data-lucide="users" class="icon-nav"></i>
-                            <span class="d-none d-md-inline text-uppercase small fw-bold">Medici</span>
+                            <span>MEDICI</span>
+                        </button>
+
+                        <!-- TASK -->
+                        <button class="btn nav-btn-custom" onclick="showView('tasks-view')" id="nav-btn-tsk">
+                            <i data-lucide="check-square" class="icon-nav"></i>
+                            <span>TASK</span>
                         </button>
                     </div>
                 </div>
@@ -319,6 +326,74 @@
 
                     <!-- MAIN CONTENT CARDS -->
                     <div id="clients-container" class="mt-2"></div>
+                </div>
+
+                <!-- AA VISTA TASKS -->
+                <div id="tasks-view" class="view">
+
+                    <!-- HEADER -->
+                    <!-- HEADER E FILTRI -->
+                    <div class="d-flex justify-content-between align-items-end mb-3 px-1 border-bottom pb-3">
+                        <div>
+                            <h2 class="h4 fw-bold mb-0 text-dark">Attività</h2>
+                            <p class="text-secondary small mb-0 mt-1">Gestisci i tuoi task e promemoria</p>
+                        </div>
+                        <button
+                            class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold d-flex align-items-center gap-2"
+                            onclick="openAddTaskModal()">
+                            <i data-lucide="plus" class="icon-sm"></i> <span class="d-none d-md-inline">Nuovo</span>
+                        </button>
+                    </div>
+
+                    <!-- Toggle Filtri Mobile (Identico ad Anagrafica) -->
+                    <button
+                        class="btn btn-white border w-100 d-flex justify-content-between align-items-center shadow-sm btn-filter-toggle-task mb-3"
+                        onclick="toggleTaskFilters()">
+                        <span class="fw-bold text-dark"><i data-lucide="sliders-horizontal" class="icon-sm"></i> Filtri
+                            Avanzati</span>
+                        <i data-lucide="chevron-down" id="task-filter-chevron"
+                            style="transition: transform 0.3s ease;"></i>
+                    </button>
+
+                    <!-- Pannello Filtri (Card su mobile, Riga centrata su PC) -->
+                    <div id="task-filter-panel"
+                        class="card mb-4 shadow-sm border-0 rounded-4 task-panel-responsive display-none">
+                        <div class="card-body p-3 p-md-0">
+                            <div class="task-filters-desktop-container">
+
+                                <!-- Filtro Stato -->
+                                <select id="filter-task-status" class="form-select task-filter-pill mb-2 mb-md-0"
+                                    onchange="renderTasks()">
+                                    <option value="" disabled selected hidden>Stato Task</option>
+                                    <option value="all">Mostra Tutti</option>
+                                    <option value="todo">Da Completare</option>
+                                </select>
+
+                                <!-- Ordinamento Priorità -->
+                                <select id="sort-task-prio" class="form-select task-filter-pill mb-2 mb-md-0"
+                                    onchange="renderTasks()">
+                                    <option value="" disabled selected hidden>Ordinamento</option>
+                                    <option value="desc">Priorità Decrescente</option>
+                                    <option value="asc">Priorità Crescente</option>
+                                </select>
+
+                                <!-- Filtro Contesto -->
+                                <select id="filter-task-context" class="form-select task-filter-pill"
+                                    onchange="renderTasks()">
+                                    <option value="" disabled selected hidden>Tipo Task</option>
+                                    <option value="all">Tutti I Task</option>
+                                    <option value="medici">Collegati A Medici</option>
+                                    <option value="admin">Organizzazione</option>
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenitore lista -->
+                    <div id="tasks-container" class="d-flex flex-column gap-2">
+                        <!-- I task verranno renderizzati qui da JS -->
+                    </div>
                 </div>
             </div>
 

@@ -211,15 +211,19 @@ input[type="radio"]:checked+.segmented-btn {
 }
 
 .form-select {
-    border: 1.5px solid var(--primary) !important;
-    color: var(--text-main);
-    transition: all 0.2s ease;
+    border: 1.5px solid #e2e8f0 !important;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
 }
 
 .form-select:focus,
 .form-control:focus {
-    border-color: var(--primary-dark) !important;
+    border-color: var(--primary) !important;
     box-shadow: 0 0 0 0.25rem rgba(255, 192, 203, 0.25) !important;
+}
+
+.form-select:valid {
+    border-color: var(--primary) !important;
 }
 
 select.form-select:invalid {
@@ -865,7 +869,6 @@ input[type="time"]:valid {
     width: 16px;
 }
 
-
 /* ==========================================================================
    AA SEZIONE 8: SISTEMA DI AUTENTICAZIONE (LOGIN)
    ========================================================================== */
@@ -988,9 +991,171 @@ input[type="time"]:valid {
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25) !important;
 }
 
+/* ==========================================================================
+   AA SEZIONE 9: VISTA TASK (TO-DO LIST)
+   ========================================================================== */
+
+/* BB Card del Task */
+.task-card {
+    background: var(--bg-white);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid #cbd5e1;
+    /* Colore base priorità */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* CC Colori Priorità (Bordo sinistro) */
+.task-prio-1 {
+    border-left-color: #94a3b8;
+}
+
+/* Bassa */
+.task-prio-2 {
+    border-left-color: #f59e0b;
+}
+
+/* Media */
+.task-prio-3 {
+    border-left-color: #ef4444;
+}
+
+/* Alta */
+
+/* BB Checkbox Circolare Custom (Stile Todoist) */
+.task-checkbox {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.task-checkbox .check-icon {
+    color: white;
+    width: 16px;
+    height: 16px;
+    transform: scale(0);
+    /* Nascosta di default */
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-checkbox:hover {
+    border-color: var(--success);
+    background-color: rgba(34, 197, 94, 0.1);
+}
+
+/* BB Contenuti Task */
+.task-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    transition: color 0.3s ease;
+}
+
+.task-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+.icon-xs {
+    width: 12px;
+    height: 12px;
+}
+
+/* BB Bottoni Azioni (Modifica/Elimina) */
+.btn-task-icon {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 0.6;
+    /* Leggermente trasparenti di base */
+}
+
+.btn-task-icon i {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-task-icon:hover {
+    background: #f1f5f9;
+    opacity: 1;
+}
+
+/* BB STATO: Task Completato */
+.task-done {
+    opacity: 0.65;
+    background-color: #f8fafc;
+    border-left-color: #e2e8f0;
+}
+
+.task-done .task-title {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+/* Animazione spunta quando completato */
+.task-done .task-checkbox {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.task-done .task-checkbox .check-icon {
+    transform: scale(1);
+    /* Appare l'icona della spunta */
+}
+
+/* Fix estetico per input select dei Task (Modale) */
+#task-medico-link {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+/* BB Filtri Task (Stile Base e Mobile) */
+.btn-filter-toggle-task {
+    display: flex !important;
+}
+
+.task-filter-pill {
+    background-color: #f8fafc;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.task-filters-desktop-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
 /* ==========================================================================
-   AA SEZIONE 9: UTILITY E RESPONSIVE DESIGN
+   AA SEZIONE 10: UTILITY
    ========================================================================== */
 
 /* BB Classi Utility */
@@ -1023,7 +1188,6 @@ input[type="time"]:valid {
 .logout-float-btn {
     border-radius: var(--radius-md) !important;
     position: fixed;
-    bottom: 20px;
     right: 20px;
     width: 45px;
     height: 45px;
@@ -1053,55 +1217,147 @@ input[type="time"]:valid {
 }
 
 
-/* BB Media Queries: Regole Ascendenti (Min-Width / Mobile First) */
+/* ==========================================================================
+   AA SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN
+   ========================================================================== */
 
-@media (min-width: 769px) {
+/* CC MOBILE (Fino a 767px - Smartphone) */
+@media (max-width: 767px) {
+
+    /* Navbar */
+    .nav-btn-custom {
+        padding: 8px 12px !important;
+        justify-content: center !important;
+        flex: 1;
+    }
+
+    .nav-btn-custom span {
+        display: none !important;
+    }
+
+    .icon-nav {
+        margin-right: 0 !important;
+    }
+
+    /* Calendario */
+    #calendar-view.active {
+        height: auto;
+        overflow: visible;
+        padding: 0 5px;
+    }
+
+    .calendar-grid {
+        grid-template-rows: auto repeat(6, 60px);
+        gap: 4px;
+        height: auto;
+    }
+
+    .day {
+        min-height: 60px !important;
+        padding: 6px !important;
+        font-size: 0.85rem;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .day .badge {
+        bottom: 4px;
+        left: 4px;
+        width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+    }
+
+    /* Viste Giorno e Liste */
+    #col-walkins {
+        display: none;
+    }
+
+    #mobile-list-selector {
+        display: flex !important;
+    }
+
+    #day-view .row.g-4 {
+        flex-direction: column;
+    }
+
+    #mobile-list-selector .segmented-control {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        gap: 10px;
+    }
+
+    #mobile-list-selector .segmented-btn {
+        border-radius: var(--radius-pill) !important;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Anagrafica */
+    #clients-container {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+}
+
+/* CC TABLET & SPLIT SCREEN (Da 768px In Su) */
+@media (min-width: 768px) {
+
+    /* Navbar & Layout Base */
+    .nav-btn-custom {
+        padding: 8px 20px !important;
+    }
+
+    .nav-btn-custom span {
+        display: inline !important;
+        margin-left: 8px;
+    }
+
     .day {
         min-height: 0;
     }
 
+    /* Anagrafica */
     #clients-container {
         grid-template-columns: repeat(2, 1fr);
     }
-}
 
-@media (min-width: 992px) {
-    .sticky-top {
-        position: static !important;
-    }
-
-    #mobile-filter-panel {
-        display: block !important;
-        position: static;
-        box-shadow: none !important;
-        margin-top: 0 !important;
-        background: transparent !important;
-    }
-
-    .btn-filter-toggle {
+    /* Task Filtri (Split Screen / Tablet) */
+    .btn-filter-toggle-task {
         display: none !important;
     }
-}
 
-@media (min-width: 1201px) {
-    #clients-container {
-        grid-template-columns: repeat(3, 1fr) !important;
+    #task-filter-panel.display-none {
+        display: block !important;
+    }
+
+    .task-panel-responsive {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .task-filters-desktop-container {
+        flex-direction: row;
+        width: 80%;
+        margin: 0 auto;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .task-filter-pill {
+        flex: 1;
+        border-radius: 50px !important;
+        background-color: #f1f5f9;
+        border: 1px solid transparent !important;
+        padding: 10px 20px !important;
+        text-align-last: center;
+        margin-bottom: 0 !important;
     }
 }
 
-
-/* BB Media Queries: Regole Discendenti (Max-Width / Desktop First) */
-
-@media (max-width: 1200px) {
-    #clients-container {
-        justify-items: start;
-    }
-
-    .client-card {
-        max-width: 100%;
-    }
-}
-
+/* CC TABLET (Filtri Mobile Attivi Fino A 991px) */
 @media (max-width: 991px) {
     #filter-panel {
         position: fixed;
@@ -1123,69 +1379,47 @@ input[type="time"]:valid {
     }
 }
 
-@media (max-width: 768px) {
+/* CC DESKTOP (Da 992px In Su) */
+@media (min-width: 992px) {
 
-    /* CC Calendario Mobile */
-    #calendar-view.active {
-        height: auto;
-        overflow: visible;
-        padding: 0 5px;
+    /* Navbar / Filtri Anagrafica */
+    .sticky-top {
+        position: static !important;
     }
 
-    .calendar-grid {
-        grid-template-rows: auto repeat(6, 60px);
-        gap: 4px;
-        height: auto;
-        width: 100%;
+    .btn-filter-toggle {
+        display: none !important;
+    }
+
+    #mobile-filter-panel {
+        display: block !important;
+        position: static;
+        box-shadow: none !important;
+        margin-top: 0 !important;
+        background: transparent !important;
+    }
+
+    /* Task Filtri */
+    .task-filters-desktop-container {
+        width: 60%;
+    }
+}
+
+/* CC LARGE DESKTOP (Gestione Griglia) */
+@media (max-width: 1199px) {
+
+    #clients-container {
+        justify-items: start;
+    }
+
+    .client-card {
         max-width: 100%;
     }
+}
 
-    .day {
-        min-height: 60px !important;
-        padding: 6px !important;
-        font-size: 0.85rem;
-        align-items: center;
-        justify-content: center;
-    }
+@media (min-width: 1200px) {
 
-    .day .badge {
-        bottom: 4px;
-        left: 4px;
-        width: 16px;
-        height: 16px;
-        font-size: 0.6rem;
-    }
-
-    /* CC Liste e Visibilità Mobile */
-    #col-walkins {
-        display: none;
-    }
-
-    #mobile-list-selector {
-        display: flex !important;
-    }
-
-    #day-view .row.g-4 {
-        flex-direction: column;
-    }
-
-    /* CC Anagrafica Mobile */
     #clients-container {
-        grid-template-columns: 1fr;
-        justify-items: center;
-    }
-
-    /* CC Fix Selettore Liste Mobile */
-    #mobile-list-selector .segmented-control {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        gap: 10px;
-    }
-
-    #mobile-list-selector .segmented-btn {
-        border-radius: var(--radius-pill) !important;
-        box-shadow: var(--shadow-sm);
+        grid-template-columns: repeat(3, 1fr) !important;
     }
 }
