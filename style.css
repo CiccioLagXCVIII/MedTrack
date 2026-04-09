@@ -67,7 +67,7 @@ body {
 .view {
     display: none;
     animation: fadeIn 0.3s ease-out;
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 0 15px;
 }
@@ -995,6 +995,13 @@ input[type="time"]:valid {
    AA SEZIONE 9: VISTA TASK (TO-DO LIST)
    ========================================================================== */
 
+#tasks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
 /* BB Card del Task */
 .task-card {
     background: var(--bg-white);
@@ -1135,23 +1142,30 @@ input[type="time"]:valid {
     color: var(--text-main);
 }
 
-/* BB Filtri Task (Stile Base e Mobile) */
-.btn-filter-toggle-task {
-    display: flex !important;
-}
-
-.task-filter-pill {
-    background-color: #f8fafc;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #475569;
+/* BB Filtri Task */
+#task-filter-panel {
+    width: 100%;
+    margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
 .task-filters-desktop-container {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.task-filter-pill {
+    flex: 1;
+    min-width: 0;
+    border-radius: 12px !important;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0 !important;
+    padding: auto !important;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
 }
 
 /* ==========================================================================
@@ -1218,171 +1232,39 @@ input[type="time"]:valid {
 
 
 /* ==========================================================================
-   AA SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN
+   SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP)
    ========================================================================== */
 
-/* CC MOBILE (Fino a 767px - Smartphone) */
-@media (max-width: 767px) {
-
-    /* Navbar */
-    .nav-btn-custom {
-        padding: 8px 12px !important;
-        justify-content: center !important;
-        flex: 1;
-    }
-
-    .nav-btn-custom span {
-        display: none !important;
-    }
-
-    .icon-nav {
-        margin-right: 0 !important;
-    }
-
-    /* Calendario */
-    #calendar-view.active {
-        height: auto;
-        overflow: visible;
-        padding: 0 5px;
-    }
-
-    .calendar-grid {
-        grid-template-rows: auto repeat(6, 60px);
-        gap: 4px;
-        height: auto;
-    }
-
-    .day {
-        min-height: 60px !important;
-        padding: 6px !important;
-        font-size: 0.85rem;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .day .badge {
-        bottom: 4px;
-        left: 4px;
-        width: 16px;
-        height: 16px;
-        font-size: 0.6rem;
-    }
-
-    /* Viste Giorno e Liste */
-    #col-walkins {
-        display: none;
-    }
-
-    #mobile-list-selector {
-        display: flex !important;
-    }
-
-    #day-view .row.g-4 {
-        flex-direction: column;
-    }
-
-    #mobile-list-selector .segmented-control {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        gap: 10px;
-    }
-
-    #mobile-list-selector .segmented-btn {
-        border-radius: var(--radius-pill) !important;
-        box-shadow: var(--shadow-sm);
-    }
-
-    /* Anagrafica */
-    #clients-container {
-        grid-template-columns: 1fr;
-        justify-items: center;
-    }
+/* CC SM: Schermi piccoli (Smartphone >= 576px) */
+@media (min-width: 576px) {
+    /* Eventuali aggiustamenti per smartphone grandi */
 }
 
-/* CC TABLET & SPLIT SCREEN (Da 768px In Su) */
+/* CC MD: Tablet (>= 768px) */
 @media (min-width: 768px) {
 
-    /* Navbar & Layout Base */
-    .nav-btn-custom {
-        padding: 8px 20px !important;
+    /* Vista Giorno: Mostra sempre entrambe le colonne */
+    #col-scheduled,
+    #col-walkins {
+        display: block !important;
     }
 
+    /* Navbar: Ritorna icone + testo */
     .nav-btn-custom span {
         display: inline !important;
         margin-left: 8px;
     }
 
-    .day {
-        min-height: 0;
-    }
-
-    /* Anagrafica */
+    /* Anagrafica: 2 colonne */
     #clients-container {
         grid-template-columns: repeat(2, 1fr);
     }
-
-    /* Task Filtri (Split Screen / Tablet) */
-    .btn-filter-toggle-task {
-        display: none !important;
-    }
-
-    #task-filter-panel.display-none {
-        display: block !important;
-    }
-
-    .task-panel-responsive {
-        background: transparent !important;
-        box-shadow: none !important;
-        border: none !important;
-    }
-
-    .task-filters-desktop-container {
-        flex-direction: row;
-        width: 80%;
-        margin: 0 auto;
-        justify-content: center;
-        gap: 15px;
-    }
-
-    .task-filter-pill {
-        flex: 1;
-        border-radius: 50px !important;
-        background-color: #f1f5f9;
-        border: 1px solid transparent !important;
-        padding: 10px 20px !important;
-        text-align-last: center;
-        margin-bottom: 0 !important;
-    }
 }
 
-/* CC TABLET (Filtri Mobile Attivi Fino A 991px) */
-@media (max-width: 991px) {
-    #filter-panel {
-        position: fixed;
-        top: 70px;
-        left: 10px;
-        right: 10px;
-        z-index: 1050;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        border-radius: 20px;
-        background: white;
-    }
-
-    .btn-filter-toggle {
-        display: flex !important;
-    }
-
-    #mobile-filter-panel.display-none {
-        display: none !important;
-    }
-}
-
-/* CC DESKTOP (Da 992px In Su) */
+/* CC LG: Desktop (>= 992px) */
 @media (min-width: 992px) {
 
-    /* Navbar / Filtri Anagrafica */
+    /* Header Anagrafica: Reset posizionamento */
     .sticky-top {
         position: static !important;
     }
@@ -1399,27 +1281,57 @@ input[type="time"]:valid {
         background: transparent !important;
     }
 
-    /* Task Filtri */
+    /* Task: Larghezza ottimizzata */
     .task-filters-desktop-container {
         width: 60%;
     }
 }
 
-/* CC LARGE DESKTOP (Gestione Griglia) */
-@media (max-width: 1199px) {
-
-    #clients-container {
-        justify-items: start;
-    }
-
-    .client-card {
-        max-width: 100%;
-    }
-}
-
+/* CC XL: Desktop Wide (>= 1200px) */
 @media (min-width: 1200px) {
 
+    /* Anagrafica: 3 colonne per schermi grandi */
     #clients-container {
         grid-template-columns: repeat(3, 1fr) !important;
     }
 }
+
+/* CC XS DOWN: Mobile (<= 767.98px) */
+@media (max-width: 767.98px) {
+
+    #col-scheduled,
+    #col-walkins {
+        display: none;
+    }
+
+    .show-scheduled #col-scheduled {
+        display: block;
+    }
+
+    .show-walkins #col-walkins {
+        display: block;
+    }
+
+    .nav-btn-custom span {
+        display: none !important;
+    }
+
+    #calendar-view.active {
+        height: auto;
+        padding: 0 5px;
+    }
+
+    .calendar-grid {
+        grid-template-rows: auto repeat(6, 60px);
+    }
+
+    #mobile-list-selector {
+        display: flex !important;
+    }
+
+    #clients-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* CC MD DOWN: Tablet e Mobile (<= 991.98px) */

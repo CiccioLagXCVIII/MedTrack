@@ -400,6 +400,23 @@ function renderDayAppointments() {
 }
 
 function toggleMobileListView(view) {
+    const container = document.getElementById('day-view'); // O il genitore che contiene le due colonne
+    const btnScheduled = document.getElementById('btn-show-scheduled');
+    const btnWalkins = document.getElementById('btn-show-walkins');
+
+    // Rimuoviamo le classi di stato precedenti
+    container.classList.remove('show-scheduled', 'show-walkins');
+    btnScheduled.classList.remove('active');
+    btnWalkins.classList.remove('active');
+
+    // Aggiungiamo la classe corretta
+    if (view === 'scheduled') {
+        container.classList.add('show-scheduled');
+        btnScheduled.classList.add('active');
+    } else {
+        container.classList.add('show-walkins');
+        btnWalkins.classList.add('active');
+    }
 }
 
 /* 
@@ -703,6 +720,7 @@ async function toggleTask(id, attualeStato) {
 }
 
 // BB Filtri Dinamici Mobile per Task
+/*
 function toggleTaskFilters() {
     const panel = document.getElementById('task-filter-panel');
     const icon = document.getElementById('task-filter-chevron');
@@ -719,6 +737,7 @@ function toggleTaskFilters() {
         icon.style.transform = "rotate(0deg)";
     }
 }
+*/
 
 // BB Eliminazione Task
 async function deleteTask(id) {
@@ -728,7 +747,7 @@ async function deleteTask(id) {
     // CC Impostazione Testo Modal
     desc.innerText = "Vuoi Eliminare Questa Attività? Questa Azione Non Può Essere Annullata.";
 
-    // CC Apre Moda
+    // CC Apre Modal
     openModal('modal-confirm');
 
     // CC Assegna Azione Al Bottone Di Conferma
@@ -1133,4 +1152,3 @@ function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t]));
 }
-

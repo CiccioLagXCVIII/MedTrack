@@ -278,7 +278,6 @@
                             <i data-lucide="chevron-down" id="filter-chevron"></i>
                         </button>
 
-                        <!-- Pannello Filtri (Hidden by default) -->
                         <!-- Pannello Filtri -->
                         <div id="mobile-filter-panel" class="card mt-2 shadow-sm border-0 rounded-4">
                             <div class="card-body p-3">
@@ -336,7 +335,7 @@
                     <div class="d-flex justify-content-between align-items-end mb-3 px-1 border-bottom pb-3">
                         <div>
                             <h2 class="h4 fw-bold mb-0 text-dark">Attività</h2>
-                            <p class="text-secondary small mb-0 mt-1">Gestisci i tuoi task e promemoria</p>
+                            <p class="text-secondary small mb-0 mt-1">Gestisci Task E Promemoria</p>
                         </div>
                         <button
                             class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold d-flex align-items-center gap-2"
@@ -345,48 +344,24 @@
                         </button>
                     </div>
 
-                    <!-- Toggle Filtri Mobile (Identico ad Anagrafica) -->
-                    <button
-                        class="btn btn-white border w-100 d-flex justify-content-between align-items-center shadow-sm btn-filter-toggle-task mb-3"
-                        onclick="toggleTaskFilters()">
-                        <span class="fw-bold text-dark"><i data-lucide="sliders-horizontal" class="icon-sm"></i> Filtri
-                            Avanzati</span>
-                        <i data-lucide="chevron-down" id="task-filter-chevron"
-                            style="transition: transform 0.3s ease;"></i>
-                    </button>
-
-                    <!-- Pannello Filtri (Card su mobile, Riga centrata su PC) -->
-                    <div id="task-filter-panel"
-                        class="card mb-4 shadow-sm border-0 rounded-4 task-panel-responsive display-none">
-                        <div class="card-body p-3 p-md-0">
-                            <div class="task-filters-desktop-container">
-
-                                <!-- Filtro Stato -->
-                                <select id="filter-task-status" class="form-select task-filter-pill mb-2 mb-md-0"
-                                    onchange="renderTasks()">
-                                    <option value="" disabled selected hidden>Stato Task</option>
-                                    <option value="all">Mostra Tutti</option>
-                                    <option value="todo">Da Completare</option>
-                                </select>
-
-                                <!-- Ordinamento Priorità -->
-                                <select id="sort-task-prio" class="form-select task-filter-pill mb-2 mb-md-0"
-                                    onchange="renderTasks()">
-                                    <option value="" disabled selected hidden>Ordinamento</option>
-                                    <option value="desc">Priorità Decrescente</option>
-                                    <option value="asc">Priorità Crescente</option>
-                                </select>
-
-                                <!-- Filtro Contesto -->
-                                <select id="filter-task-context" class="form-select task-filter-pill"
-                                    onchange="renderTasks()">
-                                    <option value="" disabled selected hidden>Tipo Task</option>
-                                    <option value="all">Tutti I Task</option>
-                                    <option value="medici">Collegati A Medici</option>
-                                    <option value="admin">Organizzazione</option>
-                                </select>
-
-                            </div>
+                    <!-- Pannello Filtri -->
+                    <div id="task-filter-panel">
+                        <div class="task-filters-desktop-container">
+                            <select id="filter-task-status" class="form-select task-filter-pill"
+                                onchange="renderTasks()">
+                                <option value="all" selected>Tutti</option>
+                                <option value="todo">Da Fare</option>
+                            </select>
+                            <select id="sort-task-prio" class="form-select task-filter-pill" onchange="renderTasks()">
+                                <option value="desc" selected>Priorità ↓</option>
+                                <option value="asc">Priorità ↑</option>
+                            </select>
+                            <select id="filter-task-context" class="form-select task-filter-pill"
+                                onchange="renderTasks()">
+                                <option value="all" selected>Tutti</option>
+                                <option value="medici">Collegati A Medici</option>
+                                <option value="admin">Organizzazione</option>
+                            </select>
                         </div>
                     </div>
 
