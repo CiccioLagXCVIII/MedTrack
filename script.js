@@ -20,7 +20,12 @@ let modalActionContext = null;      // Contesto dell'azione (es. 'walkin-done')
 let modalTargetId = null;           // ID dell'oggetto target della modifica
 let modalTargetOldDate = null;      // Data originale prima di uno spostamento
 
-
+// BB Flag Di Controllo
+const appState = {
+    calendarNeedsRefresh: true,
+    clientsNeedsRefresh: true,
+    tasksNeedsRefresh: true
+};
 
 /* 
 AA 2: INIZIALIZZAZIONE E GESTIONE VISTE (SPA LOGIC)
@@ -70,18 +75,24 @@ function showView(viewId) {
         btnCal.classList.add('active');
         btnCli.classList.remove('active');
         btnTsk.classList.remove('active');
-        loadMonthDataFromSupabase(currentDate);
+        if (appState.calendarNeedsRefresh) {
+            loadMonthDataFromSupabase(currentDate);
+        }
     } else if (viewId === 'clients-view') {
         btnCli.classList.add('active');
         btnCal.classList.remove('active');
         btnTsk.classList.remove('active');
-        resetAllFilters();
-        loadAllDataFromSupabase();
+        if (appState.clientsNeedsRefresh) {
+            resetAllFilters();
+            loadAllDataFromSupabase();
+        }
     } else if (viewId === 'tasks-view') {
         btnTsk.classList.add('active');
         btnCal.classList.remove('active');
         btnCli.classList.remove('active');
-        renderTasks();
+        if (appState.tasksNeedsRefresh) {
+            renderTasks();
+        }
     }
 
     // CC Refresh icone Lucide dopo ogni cambio vista
@@ -95,9 +106,23 @@ AA 3: COMUNICAZIONE CON DATABASE (SUPABASE FETCHING)
 
 // BB Caricamento Dati Mensili (Calendario)
 async function loadMonthDataFromSupabase(targetDate) {
-    tempMonthYear = targetDate.format('MMMM YYYY');
-    monthYearString = tempMonthYear.charAt(0).toUpperCase() + tempMonthYear.slice(1);
+    const tempMonthYear = targetDate.format('MMMM YYYY');
+    const monthYearString = tempMonthYear.charAt(0).toUpperCase() + tempMonthYear.slice(1);
     console.log(`🔄 Caricamento Dati Per ${monthYearString}`);
+
+    const grid = document.getElementById('calendar-grid');
+
+    // CC Skeleton Loading per il Calendario (sfuma l'intera griglia finché non carica)
+    grid.innerHTML = '<div class="skeleton-box" style="height: 300px; grid-column: span 7;"></div>';
+
+    // CC Scenario Offline per il Calendario
+    if (!navigator.onLine) {
+        openAlert("Sei offline. Il Calendario Potrebbe Non Mostrare Le Visite Aggiornate.");
+        renderCalendar();
+        return;
+    }
+
+    // CC Scenario Online: Carichiamo I Dati Da Supabase
     try {
         const startOfMonth = targetDate.startOf('month').format('YYYY-MM-DD');
         const endOfMonth = targetDate.endOf('month').format('YYYY-MM-DD');
@@ -125,6 +150,9 @@ async function loadMonthDataFromSupabase(targetDate) {
 
         allVisits = visite || [];
 
+        // CC Flag pulizia: Il calendario ora è aggiornato!
+        appState.calendarNeedsRefresh = false;
+
         // CC Aggiornamento UI
         processVisitsForCalendar();
         renderCalendar();
@@ -140,29 +168,62 @@ async function loadMonthDataFromSupabase(targetDate) {
 // BB Caricamento Dati Anagrafica (Vista SQL)
 async function loadAllDataFromSupabase() {
     console.log("🔄 Caricamento Anagrafica Tramite Vista SQL...");
+    const container = document.getElementById('clients-container');
+
+    // CC Skeleton Loading
+    container.innerHTML = `
+        <div class="skeleton-box skeleton-card"></div>
+        <div class="skeleton-box skeleton-card"></div>
+        <div class="skeleton-box skeleton-card"></div>
+        <div class="skeleton-box skeleton-card"></div>
+    `;
+
+    // CC Scenario Offline: Proviamo a Caricare Dati dalla Cache
+    if (!navigator.onLine) {
+        const cachedData = await getFromOfflineCache('clientsData');
+        if (cached) {
+            clientsList = cached;
+            updateSpecDropdowns(); updateCityFilter(); renderClients();
+            return;
+        } else {
+            return openAlert("Sei Offline E Non Hai Dati In Cache.");
+        }
+    }
+
+    // CC Scenario Online: Carichiamo I Dati Da Supabase
     try {
         // DD: Usiamo una Vista SQL su Supabase per ottenere i dati calcolati (ultima visita, prossima)
         // DD direttamente dal DB invece di calcolarli nel frontend, migliorando la reattività.
         let { data, error } = await sb.from('medici_con_stato_visite').select('*');
 
-        if (error) throw error;
+        if (!error) {
+            clientsList = data.map(m => ({
+                id: m.id,
+                name: m.nome,
+                city: m.citta,
+                address: m.indirizzo || '',
+                phone: m.cellulare || '',
+                specialization: m.specializzazione,
+                giorni_liberi: m.giorni_liberi,
+                lastVisit: m.ultima_visita_passata,
+                nextVisit: m.prossima_visita_futura,
+                lastNote: m.nota_ultima_visita
+            }));
+            // Dati Puliti Li Salvo In RAM
+            appState.clientsNeedsRefresh = false;
 
-        clientsList = data.map(m => ({
-            id: m.id,
-            name: m.nome,
-            city: m.citta,
-            address: m.indirizzo || '',
-            phone: m.cellulare || '',
-            specialization: m.specializzazione,
-            giorni_liberi: m.giorni_liberi,
-            lastVisit: m.ultima_visita_passata,
-            nextVisit: m.prossima_visita_futura,
-            lastNote: m.nota_ultima_visita
-        }));
+            // CC Salvataggio Nella Memoria Del Telefono (Offline Cache)
+            if (typeof saveToOfflineCache === 'function') {
+                saveToOfflineCache('clientsData', clientsList);
+            }
 
-        updateSpecDropdowns();
-        updateCityFilter();
-        renderClients();
+            updateSpecDropdowns();
+            updateCityFilter();
+            renderClients();
+        } else {
+            openAlert("Errore Nel Caricamento Dei Dati Anagrafici.");
+        }
+
     } catch (error) {
         console.error("Errore Caricamento Vista:", error);
         openAlert("Errore nel caricamento dei dati medici.");
@@ -548,6 +609,7 @@ function clearSearch() {
 /* 
 AA 7: GESTIONE VISTA TASK
 */
+
 // BB Apertura Modale Nuovo Task
 async function openAddTaskModal() {
     if (clientsList.length === 0) {
@@ -609,11 +671,14 @@ async function saveTask() {
 
     if (id) {
         // Modifica
-        await sb.from('tasks').update(payload).eq('id', id);
+        await executeDBAction('UPDATE', 'tasks', payload, { id: id });
     } else {
         // Nuovo Inserimento
-        await sb.from('tasks').insert([payload]);
+        await executeDBAction('INSERT', 'tasks', payload);
     }
+
+    // CC Imposto Flag Di Refresh
+    appState.tasksNeedsRefresh = true;
 
     closeModal('modal-add-task');
     renderTasks();
@@ -715,29 +780,11 @@ async function renderTasks() {
 
 // BB Toggle Stato Task
 async function toggleTask(id, attualeStato) {
-    await sb.from('tasks').update({ completato: !attualeStato }).eq('id', id);
+    await executeDBAction('UPDATE', 'tasks', { completato: !attualeStato }, { id: id });
+    appState.tasksNeedsRefresh = true;
     renderTasks();
 }
 
-// BB Filtri Dinamici Mobile per Task
-/*
-function toggleTaskFilters() {
-    const panel = document.getElementById('task-filter-panel');
-    const icon = document.getElementById('task-filter-chevron');
-
-    // Su PC disabilita Il Toggle E Mostra Sempre I Filtri
-    if (window.innerWidth >= 768) return;
-
-    panel.classList.toggle('display-none');
-
-    // Rotazione Icona
-    if (!panel.classList.contains('display-none')) {
-        icon.style.transform = "rotate(180deg)";
-    } else {
-        icon.style.transform = "rotate(0deg)";
-    }
-}
-*/
 
 // BB Eliminazione Task
 async function deleteTask(id) {
@@ -753,8 +800,9 @@ async function deleteTask(id) {
     // CC Assegna Azione Al Bottone Di Conferma
     confirmBtn.onclick = async () => {
         // Esegui eliminazione
-        await sb.from('tasks').delete().eq('id', id);
-
+        await executeDBAction('DELETE', 'tasks', null, { id: id });
+        // CC Imposto Flag Di Refresh
+        appState.tasksNeedsRefresh = true;
         // CC Chiusura Modal E Refresh Lista
         closeModal('modal-confirm');
         renderTasks();
@@ -793,10 +841,33 @@ async function editTask(id) {
     openModal('modal-add-task');
 }
 
-
-/* 
-AA 8: AZIONI E MUTAZIONI DATI (SCRITTURA SUPABASE)
+/*
+   AA 8: AZIONI E MUTAZIONI DATI (ROUTER ONLINE/OFFLINE)
 */
+
+// BB Smart Router: Decide se scrivere su Supabase o in Offline Queue
+async function executeDBAction(op, table, payload, matchCriteria = null) {
+    if (navigator.onLine) {
+        // CC ONLINE: Esegui Query Su Supabase
+        const query = sb.from(table)[op.toLowerCase()](payload);
+        if (matchCriteria) query.match(matchCriteria);
+        return await query;
+    } else {
+        // CC OFFLINE: Aggiungi Operazione Alla Coda Di Sincronizzazione
+        await addToSyncQueue(op, table, payload, matchCriteria);
+
+        // CC Aggiornamento UI Immediato
+        // Se aggiungi un medico offline, aggiungilo manualmente alla lista in RAM
+        if (op === 'INSERT' && table === 'medici') {
+            tempID = crypto.randomUUID();
+            clientsList.push({ id: tempID, ...payload });
+            renderClients();
+        }
+
+        openAlert("Sei Offline. Le modifiche verranno sincronizzate al ripristino della rete.");
+        return { data: [payload], error: null };
+    }
+}
 
 // BB Inserimento Appuntamenti e Medici
 async function addAppointment() {
@@ -814,28 +885,45 @@ async function addAppointment() {
         if (spec === 'NEW_SPEC') spec = document.getElementById('custom-spec-input').value.trim();
         if (!nome || !spec) return openAlert("Nome e Specializzazione Sono Obbligatori.");
 
-        const { data, error } = await sb.from('medici').insert([{
-            nome, citta, indirizzo, cellulare, specializzazione: spec
-        }]).select();
+        const tempID = crypto.randomUUID();
 
-        if (error) return openAlert("Errore salvataggio medico: " + error.message);
-        clientId = data[0].id;
-    } else {
-        clientId = document.getElementById('existing-client-select').value;
-        if (!clientId) return openAlert("Seleziona un medico.");
+        const medicoPayload = {
+            id: tempID, // Passiamo l'ID generato da noi
+            nome,
+            citta,
+            indirizzo,
+            cellulare,
+            specializzazione: spec
+        };
+
+        const response = await executeDBAction('INSERT', 'medici', medicoPayload);
+
+        // Operatore ?. È Il Null Safe Di JS. Se response è null O undefined Non Genera Errore Ma Si Limita A Restituire undefined, Evitando Crash In Caso Di Problemi Di Connessione O Altri Errori
+        if (response?.error) {
+            return openAlert("Errore Durante Inserimento Nuovo Medico");
+        } else {
+            // Uso L'ID Temporaneo Per Aggiornare Immediatamente La UI,
+            // Verrà Sostituito Con Quello Reale Al Momento Della Sincronizzazione
+            clientId = tempID;
+        }
+
     }
 
     if (currentTab === 'scheduled') {
         // CC Salvataggio visita con orario
         const time = document.getElementById('appointment-time').value;
-        if (!time) return openAlert("Inserisci l'orario.");
-        await sb.from('visite').insert([{ medico_id: clientId, data_visita: selectedDateISO, ora_visita: time }]);
+        if (!time) return openAlert("Inserisci Orario Visita.");
+        await executeDBAction('INSERT', 'visite', { medico_id: clientId, data_visita: selectedDateISO, ora_visita: time });
     } else {
         // CC Salvataggio giorni di ricevimento (Walk-in)
         const checkboxes = document.querySelectorAll('#available-days-checkboxes input:checked');
         const days = Array.from(checkboxes).map(cb => cb.value).join(',');
-        await sb.from('medici').update({ giorni_liberi: days }).eq('id', clientId);
+        await executeDBAction('UPDATE', 'medici', { giorni_liberi: days }, { id: clientId });
     }
+
+    // CC Imposto Flag Di Refresh
+    appState.calendarNeedsRefresh = true;
+    appState.clientsNeedsRefresh = true;
 
     await loadMonthDataFromSupabase(currentDate);
     openDayView(selectedDateISO);
@@ -852,9 +940,13 @@ async function confirmEditClient() {
 
     if (!name) return openAlert("Il nome è obbligatorio.");
 
-    await sb.from('medici').update({
+    await executeDBAction('UPDATE', 'medici', {
         nome: name, citta: city, cellulare: phone, specializzazione: spec, giorni_liberi: days
-    }).eq('id', modalTargetId);
+    }, { id: modalTargetId });
+
+    // CC Imposto Flag Di Refresh
+    appState.calendarNeedsRefresh = true;
+    appState.clientsNeedsRefresh = true;
 
     closeModal('modal-edit-client');
     await loadAllDataFromSupabase();
@@ -868,21 +960,23 @@ async function confirmEditVisit() {
     if (!newDate || !newTime) return openAlert("Inserisci una data e un orario validi.");
 
     // CC Aggiornamento Visita DIRETTAMENTE Nel Database
-    // In questo modo non dipende dall'array locale "allVisits" (che contiene solo il mese corrente),
-    // permettendoci di spostare visite anche di mesi futuri o passati senza errori.
-    const { error } = await sb.from('visite')
-        .update({ data_visita: newDate, ora_visita: newTime })
-        .eq('medico_id', modalTargetId)
-        .eq('data_visita', modalTargetOldDate);
+    // DD In questo modo non dipende dall'array locale "allVisits" (che contiene solo il mese corrente),
+    // DD permettendoci di spostare visite anche di mesi futuri o passati senza errori.
+    const response = await executeDBAction('UPDATE', 'visite',
+        { data_visita: newDate, ora_visita: newTime },
+        { medico_id: modalTargetId, data_visita: modalTargetOldDate });
 
-    if (error) {
-        return openAlert("Errore Durante Aggiornamento: " + error.message);
+    // Operatore ?. È Il Null Safe Di JS. Se response è null O undefined Non Genera Errore Ma Si Limita A Restituire undefined, Evitando Crash In Caso Di Problemi Di Connessione O Altri Errori
+    if (response?.error) {
+        return openAlert("Errore Durante Aggiornamento");
+    } else {
+        closeModal('modal-edit-visit');
+        // CC Imposto Flag Di Refresh
+        appState.calendarNeedsRefresh = true;
+        appState.clientsNeedsRefresh = true;
     }
 
-    closeModal('modal-edit-visit');
-
-    // Forza il ricalcolo della View SQL per aggiornare le card
-
+    // CC Ricalcolo Vista SQL Per Aggiornare Le Card In Base Alle Nuove Date/Orari
     if (document.getElementById('clients-view').classList.contains('active')) {
         // Se Siamo In Anagrafica
         await loadAllDataFromSupabase();
@@ -910,11 +1004,16 @@ function editNote(visitId, currentNote) {
 
     saveBtn.onclick = async () => {
         const newNote = input.value.trim();
-        const { error } = await sb.from('visite').update({ note: newNote }).eq('id', visitId);
-        if (error) {
-            openAlert("Errore nel salvataggio della nota.");
+        const response = await executeDBAction('UPDATE', 'visite', { note: newNote }, { id: visitId });
+
+        // Operatore ?. È Il Null Safe Di JS. Se response è null O undefined Non Genera Errore Ma Si Limita A Restituire undefined, Evitando Crash In Caso Di Problemi Di Connessione O Altri Errori
+        if (response?.error) {
+            openAlert("Errore Nel Salvataggio Della Nota");
         } else {
+            // CC Imposto Flag Di Refresh
             closeModal('modal-note');
+            appState.clientsNeedsRefresh = true;
+            // DD Il Calendario Si Refresha Sotto
             await loadMonthDataFromSupabase(currentDate);
             openDayView(selectedDateISO);
         }
@@ -929,7 +1028,12 @@ async function deleteApp(visitDbId) {
     openModal('modal-confirm');
 
     confirmBtn.onclick = async () => {
-        await sb.from('visite').delete().eq('id', visitDbId);
+        await executeDBAction('DELETE', 'visite', null, { id: visitDbId });
+
+        // CC Imposto Flag Di Refresh
+        appState.calendarNeedsRefresh = true;
+        appState.clientsNeedsRefresh = true;
+
         closeModal('modal-confirm');
         await loadMonthDataFromSupabase(currentDate);
         openDayView(selectedDateISO);
@@ -950,12 +1054,17 @@ async function markWalkinDone(id) {
 async function confirmTimeModal() {
     const time = document.getElementById('modal-time-input').value;
     if (modalActionContext === 'walkin-done') {
-        await sb.from('visite').insert([{
+        await executeDBAction('INSERT', 'visite', {
             medico_id: modalTargetId,
             data_visita: selectedDateISO,
             ora_visita: time,
             is_walkin_done: true
-        }]);
+        });
+
+        // CC Imposto Flag Di Refresh
+        appState.calendarNeedsRefresh = true;
+        appState.clientsNeedsRefresh = true;
+
         closeModal('modal-time');
         await loadMonthDataFromSupabase(currentDate);
         openDayView(selectedDateISO);
@@ -1088,6 +1197,28 @@ function updateCityFilter() {
     select.value = current;
 }
 
+// BB Indicatore Stato Rete Nella Navbar
+function updateNetworkLED(state) {
+    const led = document.getElementById('network-led');
+    if (!led) return;
+
+    // Rimozione Vecchi Stili E Classi
+    led.style.backgroundColor = '';
+    led.classList.remove('online', 'offline', 'syncing');
+
+    // Applicazione Stile E Classe In Base Allo Stato Della Rete
+    if (state === true || state === 'online') {
+        led.classList.add('online');
+        led.title = "Connesso";
+    } else if (state === false || state === 'offline') {
+        led.classList.add('offline');
+        led.title = "Offline (Dati In Coda)";
+    } else if (state === 'syncing') {
+        led.classList.add('syncing');
+        led.title = "Sincronizzazione In Corso...";
+    }
+}
+
 // BB Gestione Avvisi Tramite Modal
 function openAlert(message) {
     const desc = document.getElementById('modal-alert-desc');
@@ -1152,3 +1283,6 @@ function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t]));
 }
+
+// BB Inizializzazione Al Caricamento
+window.addEventListener('load', () => updateNetworkLED(navigator.onLine));

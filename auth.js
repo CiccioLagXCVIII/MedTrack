@@ -54,14 +54,12 @@ async function handleLogin(e) {
     const password = document.getElementById('login-password').value;
     const errorEl = document.getElementById('login-error');
     const btn = document.getElementById('login-btn');
-    const spinner = document.getElementById('login-spinner');
     const btnText = btn.querySelector('.btn-text');
 
     // CC: Reset UI e feedback di caricamento
     errorEl.style.display = "none";
     btn.disabled = true;
-    btnText.style.display = "none";
-    spinner.style.display = "block";
+    btn.classList.add('btn-loading-modern');
 
     try {
         const { data, error } = await sb.auth.signInWithPassword({
@@ -79,11 +77,10 @@ async function handleLogin(e) {
         }, 500);
 
     } catch (error) {
-        errorEl.innerText = "Accesso negato: controlla le tue credenziali.";
+        errorEl.innerText = "Accesso Negato. Controlla Credenziali.";
         errorEl.style.display = "block";
         btn.disabled = false;
-        btnText.style.display = "block";
-        spinner.style.display = "none";
+        btn.classList.remove('btn-loading-modern');
     }
 }
 

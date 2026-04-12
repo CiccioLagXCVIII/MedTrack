@@ -1133,10 +1133,8 @@ input[type="time"]:valid {
 
 .task-done .task-checkbox .check-icon {
     transform: scale(1);
-    /* Appare l'icona della spunta */
 }
 
-/* Fix estetico per input select dei Task (Modale) */
 #task-medico-link {
     font-weight: 500;
     color: var(--text-main);
@@ -1151,21 +1149,28 @@ input[type="time"]:valid {
 
 .task-filters-desktop-container {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     width: 100%;
     max-width: 100%;
 }
 
 .task-filter-pill {
-    flex: 1;
+    flex: 1 1 0%;
     min-width: 0;
     border-radius: 12px !important;
     background-color: #ffffff;
     border: 1px solid #e2e8f0 !important;
-    padding: auto !important;
-    font-size: 0.85rem;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 8px 22px 8px 8px !important;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+
     cursor: pointer;
-    text-align: center;
+    color: var(--text-main);
 }
 
 /* ==========================================================================
@@ -1230,9 +1235,8 @@ input[type="time"]:valid {
     height: 24px;
 }
 
-
 /* ==========================================================================
-   SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP)
+   AA SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP)
    ========================================================================== */
 
 /* CC SM: Schermi piccoli (Smartphone >= 576px) */
@@ -1264,7 +1268,6 @@ input[type="time"]:valid {
 /* CC LG: Desktop (>= 992px) */
 @media (min-width: 992px) {
 
-    /* Header Anagrafica: Reset posizionamento */
     .sticky-top {
         position: static !important;
     }
@@ -1279,11 +1282,6 @@ input[type="time"]:valid {
         box-shadow: none !important;
         margin-top: 0 !important;
         background: transparent !important;
-    }
-
-    /* Task: Larghezza ottimizzata */
-    .task-filters-desktop-container {
-        width: 60%;
     }
 }
 
@@ -1335,3 +1333,127 @@ input[type="time"]:valid {
 }
 
 /* CC MD DOWN: Tablet e Mobile (<= 991.98px) */
+
+/* ==========================================================================
+   AA 11: LED STATO DI RETE (ONLINE / OFFLINE / SYNC)
+   ========================================================================== */
+
+.status-led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+    transition: background-color 0.3s ease;
+}
+
+/* Stato Online: Verde Solido */
+.status-led.online {
+    background-color: #22c55e !important;
+}
+
+/* Stato Offline: Rosso Solido Pulsante */
+.status-led.offline {
+    background-color: #ef4444 !important;
+    animation: pulse-opacity 1.5s infinite;
+}
+
+/* Stato Syncing: Blu Solido Lampeggiante Veloce */
+.status-led.syncing {
+    background-color: #3b82f6 !important;
+    animation: pulse-opacity 0.6s infinite alternate;
+}
+
+/* Animazione */
+@keyframes pulse-opacity {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+/* ==========================================================================
+   AA 12: STATI DI CARICAMENTO (SKELETON & BUTTONS)
+   ========================================================================== */
+
+/* BB: Skeleton Loading per i contenuti (Card, Task, ecc) */
+.skeleton-box {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    border-radius: var(--radius-md);
+    color: transparent !important;
+    border: none !important;
+    pointer-events: none;
+    min-height: 20px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Varianti specifiche per lo skeleton */
+.skeleton-card {
+    height: 220px;
+    width: 100%;
+    border-radius: 24px;
+}
+
+.skeleton-task {
+    height: 80px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    width: 80%;
+}
+
+.skeleton-title {
+    height: 24px;
+    margin-bottom: 12px;
+    width: 50%;
+}
+
+/* BB: Pulsante Login Moderno (Sostituisce lo spinner) */
+.btn-loading-modern {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading-modern::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin-smooth 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin-smooth {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}

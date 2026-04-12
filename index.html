@@ -41,6 +41,9 @@
         <!-- BB 4.3: Supabase & Lucid Icon -->
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="https://unpkg.com/lucide@latest"></script>
+        <!-- BB 4.4: Libreria Per Dropdown Custom (Solo PC) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
         <!-- AA 5: LOGICA APPLICATIVA E PWA MANAGER -->
         <!-- CC 5.1: Configurazione, Auth e Core Logic -->
@@ -49,6 +52,8 @@
         <script src="script.js" defer></script>
         <!-- CC 5.2: Gestione Installazione PWA (Service Worker) -->
         <script src="pwaManager.js" defer></script>
+        <!-- CC 5.3: Gestione Offline -->
+        <script src="offlineManager.js" defer></script>
     </head>
 
     <body>
@@ -61,6 +66,7 @@
                         onclick="showView('calendar-view')">
                         <img src="icon/siteLogo.png" alt="Logo" class="logo-nav">
                         <span class="fw-bolder d-none d-sm-inline">MedTrack</span>
+                        <span id="network-led" class="status-led online" title="Connesso"></span>
                     </a>
 
                     <div class="d-flex gap-1 bg-light p-1 rounded-pill border shadow-sm" id="main-nav">
