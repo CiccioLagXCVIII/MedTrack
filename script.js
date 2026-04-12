@@ -104,21 +104,30 @@ function showView(viewId) {
 AA 3: COMUNICAZIONE CON DATABASE (SUPABASE FETCHING)
 */
 
-// BB Caricamento Dati Mensili (Calendario)
+// BB Caricamento Dati Mensili (Calendario con Offline Support)
 async function loadMonthDataFromSupabase(targetDate) {
     const tempMonthYear = targetDate.format('MMMM YYYY');
     const monthYearString = tempMonthYear.charAt(0).toUpperCase() + tempMonthYear.slice(1);
-    console.log(`🔄 Caricamento Dati Per ${monthYearString}`);
 
     const grid = document.getElementById('calendar-grid');
-
-    // CC Skeleton Loading per il Calendario (sfuma l'intera griglia finché non carica)
     grid.innerHTML = '<div class="skeleton-box" style="height: 300px; grid-column: span 7;"></div>';
 
-    // CC Scenario Offline per il Calendario
+    // CC Scenario Offline Per Calendario E Visite
     if (!navigator.onLine) {
-        openAlert("Sei offline. Il Calendario Potrebbe Non Mostrare Le Visite Aggiornate.");
-        renderCalendar();
+        const cachedVisits = await getFromOfflineCache('visitsData');
+        const cachedClients = await getFromOfflineCache('clientsData');
+
+        if (cachedVisits && cachedClients) {
+            allVisits = cachedVisits;
+            clientsList = cachedClients;
+            processVisitsForCalendar();
+            renderCalendar();
+            updateExistingClientsSelect();
+            // Evitiamo Alert Multipli E Aggiorna In Silenzio Se Non Ho Dati In Cache
+        } else {
+            openAlert("Nessuna Visita Salvata In Cache Per Il Mese Di " + monthYearString + ". Conntettiti A Internet Per Caricare I Dati.");
+            renderCalendar(); // Rende Griglia Vuota
+        }
         return;
     }
 
@@ -127,21 +136,14 @@ async function loadMonthDataFromSupabase(targetDate) {
         const startOfMonth = targetDate.startOf('month').format('YYYY-MM-DD');
         const endOfMonth = targetDate.endOf('month').format('YYYY-MM-DD');
 
-        // CC Fetch Medici per risoluzione nomi
         let { data: medici, error: mediciError } = await sb.from('medici').select('*');
         if (mediciError) throw mediciError;
 
         clientsList = (medici || []).map(m => ({
-            id: m.id,
-            name: m.nome,
-            city: m.citta,
-            address: m.indirizzo || '',
-            phone: m.cellulare || '',
-            specialization: m.specializzazione,
-            giorni_liberi: m.giorni_liberi
+            id: m.id, name: m.nome, city: m.citta, address: m.indirizzo || '',
+            phone: m.cellulare || '', specialization: m.specializzazione, giorni_liberi: m.giorni_liberi
         }));
 
-        // CC Fetch Visite limitate al range del mese per performance
         let { data: visite, error: visiteError } = await sb.from('visite')
             .select('*, medici(*)')
             .gte('data_visita', startOfMonth)
@@ -150,17 +152,19 @@ async function loadMonthDataFromSupabase(targetDate) {
 
         allVisits = visite || [];
 
-        // CC Flag pulizia: Il calendario ora è aggiornato!
-        appState.calendarNeedsRefresh = false;
+        // CC Salviamo In Cache Per Uso Offline
+        if (typeof saveToOfflineCache === 'function') {
+            saveToOfflineCache('visitsData', allVisits);
+            saveToOfflineCache('clientsData', clientsList);
+        }
 
-        // CC Aggiornamento UI
+        appState.calendarNeedsRefresh = false;
         processVisitsForCalendar();
         renderCalendar();
         updateExistingClientsSelect();
         updateSpecDropdowns();
 
     } catch (error) {
-        console.error("Errore Caricamento Mese:", error);
         openAlert("Errore Caricamento Dati Per Il Mese Selezionato.");
     }
 }
@@ -181,9 +185,11 @@ async function loadAllDataFromSupabase() {
     // CC Scenario Offline: Proviamo a Caricare Dati dalla Cache
     if (!navigator.onLine) {
         const cachedData = await getFromOfflineCache('clientsData');
-        if (cached) {
-            clientsList = cached;
-            updateSpecDropdowns(); updateCityFilter(); renderClients();
+        if (cachedData) {
+            clientsList = cachedData;
+            updateSpecDropdowns();
+            updateCityFilter();
+            renderClients();
             return;
         } else {
             return openAlert("Sei Offline E Non Hai Dati In Cache.");
@@ -333,7 +339,7 @@ AA 5: GESTIONE VISTA GIORNALIERA (DAY VIEW)
 */
 
 // BB Apertura Dettaglio Giorno
-function openDayView(dateISO) {
+async function openDayView(dateISO) {
     selectedDateISO = dateISO;
 
     const dataBase = dayjs(dateISO).locale('it').format('DD MMMM YYYY');
@@ -346,6 +352,15 @@ function openDayView(dateISO) {
     } else {
         document.getElementById('col-scheduled').style.display = 'block';
         document.getElementById('col-walkins').style.display = 'block';
+    }
+
+    // Controllo Che I Medici Siano Caricati Da Supabase O Da Cache
+    if (clientsList.length === 0) {
+        if (!navigator.onLine) {
+            clientsList = await getFromOfflineCache('clientsData') || [];
+        } else {
+            await loadAllDataFromSupabase();
+        }
     }
 
     resetForm();
@@ -701,25 +716,38 @@ function toggleTaskType() {
     }
 }
 
-// BB Rendering Task Evoluto (Con Filtri)
+// BB Rendering Task Evoluto (Con Filtri e Offline)
 async function renderTasks() {
     const container = document.getElementById('tasks-container');
+    let tasks = [];
 
-    // 1. Fetch dal DB di tutti i task
-    const { data: tasks, error } = await sb.from('tasks').select('*, medici(nome)');
-    if (error) return;
+    // CC Logica Online / Offline Per i Task
+    if (!navigator.onLine) {
+        const cachedTasks = await getFromOfflineCache('tasksData');
+        if (cachedTasks) {
+            tasks = cachedTasks;
+        } else {
+            return; // Se Cache Vuoto, Non Mostriamo Nulla (Potremmo Aggiungere Un Messaggio In Futuro)
+        }
+    } else {
+        const { data, error } = await sb.from('tasks').select('*, medici(nome)');
+        if (error) return;
+        tasks = data;
+        // Se C'È Connessione, Aggiorniamo La Cache Con I Dati Più Recenti
+        if (typeof saveToOfflineCache === 'function') {
+            saveToOfflineCache('tasksData', tasks);
+        }
+    }
 
     let filteredTasks = [...tasks];
 
-    // 2. Acquisizione Valori (Con fallback ai valori di default se è selezionato il placeholder)
+    // Acquisizione Valori (Con Fallback)
     const statusF = document.getElementById('filter-task-status').value || 'todo';
     const prioF = document.getElementById('sort-task-prio').value || 'desc';
     const contextF = document.getElementById('filter-task-context').value || 'all';
 
-    // 3. Applicazione Filtro STATO (!t.completato è più sicuro di === false)
-    if (statusF === 'todo') {
-        filteredTasks = filteredTasks.filter(t => !t.completato);
-    }
+    // Applicazione Filtro STATO
+    if (statusF === 'todo') filteredTasks = filteredTasks.filter(t => !t.completato);
 
     // 4. Applicazione Filtro CONTESTO
     if (contextF === 'medici') {
@@ -728,52 +756,31 @@ async function renderTasks() {
         filteredTasks = filteredTasks.filter(t => t.medico_id === null);
     }
 
-    // 5. Applicazione Ordinamento PRIORITÀ
+    // Applicazione Ordinamento PRIORITÀ
     filteredTasks.sort((a, b) => {
         if (a.completato !== b.completato) return a.completato ? 1 : -1;
-
-        if (prioF === 'desc') {
-            return b.priorita - a.priorita;
-        } else {
-            return a.priorita - b.priorita;
-        }
+        return prioF === 'desc' ? b.priorita - a.priorita : a.priorita - b.priorita;
     });
 
-    // 6. Rendering a schermo
+    // Rendering A Schermo
     container.innerHTML = filteredTasks.length ? filteredTasks.map(t => `
         <div class="task-card ${t.completato ? 'task-done' : ''} task-prio-${t.priorita} shadow-sm">
             <div class="d-flex align-items-center w-100">
-                
                 <button class="task-checkbox" onclick="toggleTask('${t.id}', ${t.completato})">
                     <i data-lucide="check" class="check-icon"></i>
                 </button>
-
                 <div class="task-content flex-grow-1 ms-3">
                     <h6 class="task-title mb-1">${escapeHTML(t.titolo)}</h6>
                     ${t.descrizione ? `<div class="text-muted small mb-1 fst-italic border-start border-2 ps-2 border-secondary opacity-75">${escapeHTML(t.descrizione)}</div>` : ''}
                     ${t.medici ? `<div class="task-meta text-primary fw-semibold"><i data-lucide="user" class="icon-xs"></i> ${t.medici.nome}</div>` : ''}
                 </div>
-
                 <div class="task-actions d-flex gap-1 ms-2">
-                    <button class="btn-task-icon text-secondary" onclick="editTask('${t.id}')" title="Modifica">
-                        <i data-lucide="edit-2"></i>
-                    </button>
-                    <button class="btn-task-icon text-danger" onclick="deleteTask('${t.id}')" title="Elimina">
-                        <i data-lucide="trash-2"></i>
-                    </button>
+                    <button class="btn-task-icon text-secondary" onclick="editTask('${t.id}')"><i data-lucide="edit-2"></i></button>
+                    <button class="btn-task-icon text-danger" onclick="deleteTask('${t.id}')"><i data-lucide="trash-2"></i></button>
                 </div>
-                
             </div>
         </div>
-    `).join('') : `
-        <div class="text-center py-5 mt-2">
-            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3 text-muted">
-                <i data-lucide="smile" style="width: 40px; height: 40px;"></i>
-            </div>
-            <h5 class="text-secondary fw-bold">Nessun Task Qui!</h5>
-            <p class="text-muted small">Cambiando i filtri in alto potresti trovare altre attività.</p>
-        </div>
-    `;
+    `).join('') : `<div class="text-center py-5 mt-2"><p class="text-muted small">Nessun Task trovato.</p></div>`;
 
     lucide.createIcons();
 }
@@ -781,6 +788,14 @@ async function renderTasks() {
 // BB Toggle Stato Task
 async function toggleTask(id, attualeStato) {
     await executeDBAction('UPDATE', 'tasks', { completato: !attualeStato }, { id: id });
+    // CC Aggiornamento UI Immediato
+    // Cerchiamo il task in RAM e invertiamo lo stato
+    const taskIndex = tasks.findIndex(t => t.id === id);
+    if (taskIndex !== -1) {
+        tasks[taskIndex].completato = !attualeStato;
+    }
+
+    // CC Forza Refresh Della Lista Con I Nuovi Dati
     appState.tasksNeedsRefresh = true;
     renderTasks();
 }
@@ -849,22 +864,48 @@ async function editTask(id) {
 async function executeDBAction(op, table, payload, matchCriteria = null) {
     if (navigator.onLine) {
         // CC ONLINE: Esegui Query Su Supabase
-        const query = sb.from(table)[op.toLowerCase()](payload);
-        if (matchCriteria) query.match(matchCriteria);
+        let query;
+        const operation = op.toUpperCase();
+
+        if (operation === 'INSERT') {
+            query = sb.from(table).insert(payload);
+        } else if (operation === 'UPDATE') {
+            query = sb.from(table).update(payload);
+            // DD: Applicazione dei filtri di corrispondenza (Es: .eq('id', '...'))
+            for (const [key, val] of Object.entries(matchCriteria)) {
+                query = query.eq(key, val);
+            }
+        } else if (operation === 'DELETE') {
+            query = sb.from(table).delete();
+            // DD: Applicazione dei filtri di corrispondenza per la cancellazione
+            for (const [key, val] of Object.entries(matchCriteria)) {
+                query = query.eq(key, val);
+            }
+        }
+
+        // DD: Esecuzione effettiva della query e gestione risultato
         return await query;
+
     } else {
         // CC OFFLINE: Aggiungi Operazione Alla Coda Di Sincronizzazione
         await addToSyncQueue(op, table, payload, matchCriteria);
 
-        // CC Aggiornamento UI Immediato
-        // Se aggiungi un medico offline, aggiungilo manualmente alla lista in RAM
+        // CC Aggiornamento UI Immediato (Salva In RAM)
+
+        // DD: Gestione Inserimento (INSERT) In Locale
         if (op === 'INSERT' && table === 'medici') {
-            tempID = crypto.randomUUID();
+            const tempID = crypto.randomUUID();
             clientsList.push({ id: tempID, ...payload });
             renderClients();
         }
 
-        openAlert("Sei Offline. Le modifiche verranno sincronizzate al ripristino della rete.");
+        // DD: Gestione Cancellazione (DELETE) In Locale
+        if (op === 'DELETE' && table === 'medici' && matchCriteria?.id) {
+            clientsList = clientsList.filter(c => c.id !== matchCriteria.id);
+            renderClients(); // Aggiorna La Vista Immediatamente
+        }
+
+        // DD: Ritorno Simulato Per Non Bloccare La Logica Della Funzione Che La Chiama
         return { data: [payload], error: null };
     }
 }
@@ -883,12 +924,12 @@ async function addAppointment() {
         let spec = document.getElementById('new-client-spec').value;
 
         if (spec === 'NEW_SPEC') spec = document.getElementById('custom-spec-input').value.trim();
-        if (!nome || !spec) return openAlert("Nome e Specializzazione Sono Obbligatori.");
+        if (!nome || !spec) return openAlert("Nome E Specializzazione Sono Obbligatori.");
 
         const tempID = crypto.randomUUID();
 
         const medicoPayload = {
-            id: tempID, // Passiamo l'ID generato da noi
+            id: tempID, // Passiamo L'ID Generato Con Crypto
             nome,
             citta,
             indirizzo,
@@ -905,6 +946,12 @@ async function addAppointment() {
             // Uso L'ID Temporaneo Per Aggiornare Immediatamente La UI,
             // Verrà Sostituito Con Quello Reale Al Momento Della Sincronizzazione
             clientId = tempID;
+
+            if (navigator.onLine) {
+                openAlert("Medico Aggiunto Con Successo!");
+            } else {
+                openAlert("Medico In Attesa. Appena Online Sarà Sincronizzato.");
+            }
         }
 
     }
@@ -1020,6 +1067,29 @@ function editNote(visitId, currentNote) {
     };
 }
 
+// BB Funzione Per Chiedere Conferma Eliminazione
+async function askDeleteClient(clientId, clientName) {
+    const desc = document.getElementById('modal-confirm-desc');
+    const confirmBtn = document.getElementById('btn-execute-confirm');
+
+    desc.innerText = `Sei sicuro di voler eliminare il medico "${clientName}"? Questa operazione eliminerà anche tutte le visite collegate.`;
+    openModal('modal-confirm');
+
+    confirmBtn.onclick = async () => {
+        // Esecuzione Eliminazione Tramite Router In Modo Che Gestisca Online/Offline
+        await executeDBAction('DELETE', 'medici', null, { id: clientId });
+
+        // Pulizia UI
+        closeModal('modal-confirm');
+        appState.clientsNeedsRefresh = true;
+
+        // Ricarica Lista
+        await loadAllDataFromSupabase();
+        openAlert("Medico eliminato con successo.");
+    };
+}
+
+// BB Cancellazione Appuntamento Con Conferma
 async function deleteApp(visitDbId) {
     const desc = document.getElementById('modal-confirm-desc');
     const confirmBtn = document.getElementById('btn-execute-confirm');
@@ -1202,9 +1272,8 @@ function updateNetworkLED(state) {
     const led = document.getElementById('network-led');
     if (!led) return;
 
-    // Rimozione Vecchi Stili E Classi
-    led.style.backgroundColor = '';
-    led.classList.remove('online', 'offline', 'syncing');
+    // Reset Di Tutte Le Classi Mantenendo Solo Quella Base
+    led.className = 'status-led';
 
     // Applicazione Stile E Classe In Base Allo Stato Della Rete
     if (state === true || state === 'online') {

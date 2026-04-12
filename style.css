@@ -297,6 +297,13 @@ input[type="time"]:valid {
     -webkit-text-fill-color: transparent;
 }
 
+/* BB Eccezione Per LED Per Fare In Modo Che DIventi Trasparente A Causa Del Gradient */
+.navbar-brand span#network-led {
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+    -webkit-text-fill-color: initial !important;
+}
+
 /* BB Bottoni Navigazione */
 .nav-btn-custom {
     border: none !important;
@@ -1339,28 +1346,40 @@ input[type="time"]:valid {
    ========================================================================== */
 
 .status-led {
+    min-width: 12px;
+    min-height: 12px;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     display: inline-block;
     margin-left: 6px;
     transition: background-color 0.3s ease;
+    background-color: #cbd5e1;
+    /* Colore grigio di base se fallisce la connessione */
 }
 
+
 /* Stato Online: Verde Solido */
-.status-led.online {
+#network-led.status-led.online {
     background-color: #22c55e !important;
+    background: #22c55e !important;
+    -webkit-text-fill-color: #22c55e !important;
+    opacity: 1 !important;
 }
 
 /* Stato Offline: Rosso Solido Pulsante */
-.status-led.offline {
+#network-led.status-led.offline {
     background-color: #ef4444 !important;
-    animation: pulse-opacity 1.5s infinite;
+    background: #ef4444 !important;
+    -webkit-text-fill-color: #ef4444 !important;
+    opacity: 1 !important;
 }
 
 /* Stato Syncing: Blu Solido Lampeggiante Veloce */
-.status-led.syncing {
+#network-led.status-led.syncing {
     background-color: #3b82f6 !important;
+    background: #3b82f6 !important;
+    -webkit-text-fill-color: #3b82f6 !important;
     animation: pulse-opacity 0.6s infinite alternate;
 }
 
