@@ -5,7 +5,7 @@
 
 <div align="center">
 
-![Versione](https://img.shields.io/badge/Versione-1.0_SaaS-blue)
+![Versione](https://img.shields.io/badge/Versione-1.6-blue)
 ![Stato](https://img.shields.io/badge/Stato-Production--Ready-success)
 ![PWA](https://img.shields.io/badge/PWA-Installable-purple)
 ![Stack](https://img.shields.io/badge/Stack-Vanilla_JS--Supabase--PostgreSQL-orange)
@@ -31,13 +31,14 @@ Il progetto risolve le sfide logistiche quotidiane di un **Informatore Scientifi
 *   **Gestione Date:** [Day.js](https://day.js.org/) (Localizzazione IT) per calcoli temporali complessi.
 *   **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL). Utilizzo avanzato di **Viste SQL (Views)** per demandare il calcolo delle date al database, azzerando i lag sul client.
 *   **Sicurezza:** Autenticazione Supabase Auth e **Row Level Security (RLS)** su tabelle e viste.
+*   **Offline-First:** Service Worker (`sw.js`) per caching delle risorse e `IndexedDB` (`offlineManager.js`) per gestire le code di sincronizzazione (Outbox Pattern).
 
 ---
 
 ## ✨ Funzionalità Core
 
 ### 1. Sistema di Accesso Protette (Auth)
-Interfaccia di login dedicata con gestione sicura delle sessioni. Reindirizzamento automatico e blocco delle rotte non autorizzate.
+Interfaccia di login dedicata con gestione sicura delle sessioni. Reindirizzamento automatico e blocco delle rotte non autorizzate tramite "Middleware" client-side.
 
 ### 2. Dashboard Calendario
 *   Visualizzazione mensile con badge numerici dinamici per il carico di lavoro.
@@ -64,30 +65,42 @@ Flusso di lavoro diviso in due modalità:
 La struttura completa del database è definita nel file [`schema.sql`](./schema.sql) presente nella root del progetto. 
 
 Per configurare il tuo ambiente su Supabase:
-
 1. Accedi alla tua Dashboard di [Supabase](https://supabase.com/).
 2. Vai nella sezione **SQL Editor** dal menu laterale.
 3. Copia l'intero contenuto del file `schema.sql` e incollalo nell'editor.
 4. **Importante:** Prima di eseguire, cerca nello script la riga relativa alla `God Mode` (Policy Developer) e sostituisci `'IL_TUO_USER_ID_AUTH'` con il tuo **UUID personale** (lo trovi in *Authentication > Users* nella tua dashboard).
 5. Clicca su **Run** per creare tabelle, relazioni, la Vista ottimizzata e le policy di sicurezza RLS.
 
-> 💡 **Nota:** Lo script è progettato per essere idempotente; assicuratevi che il database sia vuoto o che non esistano conflitti di nome prima dell'esecuzione se state migrando da una versione precedente.
-
 ### 2. Configurazione Frontend (Protezione API)
 Per connettere l'app al database:
 1. Crea un file chiamato `config.js` nella root del progetto.
-2. Inserisci le tue credenziali Supabase (usa la chiave pubblica `anon`):
+2. Inserisci le tue credenziali Supabase:
    ```javascript
    const CONFIG = {
        SUPABASE_URL: 'https://tuo-progetto.supabase.co',
        SUPABASE_KEY: 'tua-chiave-anon-key'
    };
    ```
-3. Assicurati che il file `config.js` sia inserito nel tuo `.gitignore`.
 
-### 3. Avvio Locale
-Poiché l'app utilizza ES Modules, `fetch()` per caricare i modali e un Service Worker per la PWA, **non puoi aprirla semplicemente facendo doppio click sul file `index.html`**. 
-Devi servirla tramite un server HTTP locale (es. l'estensione *Live Server* su VS Code o Node `http-server`).
+### 3. Avvio e Sviluppo
+*   **Server Locale:** Poiché l'app utilizza moduli ES, Service Worker e `fetch` dinamico, è necessario utilizzare un server locale. Se usi VS Code, l'estensione **Live Server** è la scelta raccomandata.
+*   **Offline Support:** Il Service Worker (`sw.js`) si occuperà di cacheare le risorse statiche. Per testare l'offline, usa il pannello "Network > Throttling > Offline" negli strumenti sviluppatore del browser.
+
+---
+
+## 📂 Struttura Cartelle
+```text
+agendaOverpoweredISF/
+┣ icon/             # Asset grafici e icone
+┣ config.js         # Credenziali API
+┣ auth.js           # Logica di autenticazione
+┣ script.js         # Core business logic
+┣ sw.js             # Service Worker (Caching)
+┣ offlineManager.js # Logica IndexedDB / Sync Queue
+┣ index.html        # SPA Main
+┣ style.css         # SaaS-style Design
+┗ schema.sql        # Setup Database PostgreSQL
+```
 
 ---
 
@@ -106,4 +119,4 @@ Il codice è condiviso esclusivamente per scopi di studio e consultazione.
 *   ❌ **Vietato:** Commercializzazione, rivendita del software "as-is" o utilizzo del brand "MedTrack / Agenda Overpowered" per fini di lucro.
 
 ---
-*Creato con ☕ e WSL da un'idea di automazione reale.*
+*Creato con ☕ e WSL da una necessità reale.*

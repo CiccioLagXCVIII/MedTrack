@@ -1072,7 +1072,7 @@ async function askDeleteClient(clientId, clientName) {
     const desc = document.getElementById('modal-confirm-desc');
     const confirmBtn = document.getElementById('btn-execute-confirm');
 
-    desc.innerText = `Sei sicuro di voler eliminare il medico "${clientName}"? Questa operazione eliminerà anche tutte le visite collegate.`;
+    desc.innerText = `Sei Sicuro Di Voler Eliminare Il Medico "${clientName}"? Questa Operazione Eliminerà Anche Tutte Le Visite Collegate.`;
     openModal('modal-confirm');
 
     confirmBtn.onclick = async () => {
@@ -1085,7 +1085,7 @@ async function askDeleteClient(clientId, clientName) {
 
         // Ricarica Lista
         await loadAllDataFromSupabase();
-        openAlert("Medico eliminato con successo.");
+        openAlert("Medico Elimitato Con Successo!");
     };
 }
 

@@ -2,7 +2,7 @@
    AA 1: CONFIGURAZIONE E ASSET
 */
 
-const CACHE_NAME = 'medtrack-v1.5.4';
+const CACHE_NAME = 'medtrack-v1.6';
 
 /*
 BB 1: LISTA RISORSE DA ARCHIVIARE

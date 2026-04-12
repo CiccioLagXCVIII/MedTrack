@@ -1,6 +1,6 @@
-/* ==========================================================================
+/*
    AA SEZIONE 1: CONFIGURAZIONE, VARIABILI E FONT
-   ========================================================================== */
+ */
 
 /* BB Root Variables */
 :root {
@@ -35,9 +35,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 2: STILI BASE E LAYOUT GLOBALE
-   ========================================================================== */
+ */
 
 /* BB Reset e Body */
 body {
@@ -94,9 +94,9 @@ textarea {
 }
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 3: COMPONENTI INTERFACCIA (UI) E FORM
-   ========================================================================== */
+ */
 
 /* BB Bottoni Universali */
 /* CC Bottoni Primari */
@@ -272,9 +272,9 @@ input[type="time"]:valid {
 }
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 4: NAVBAR E NAVIGAZIONE
-   ========================================================================== */
+ */
 
 /* BB Barra di Navigazione */
 .navbar {
@@ -326,9 +326,9 @@ input[type="time"]:valid {
 }
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 5: VISTA CALENDARIO
-   ========================================================================== */
+ */
 
 /* BB Struttura Calendario */
 #calendar-view.active {
@@ -470,9 +470,9 @@ input[type="time"]:valid {
 }
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 6: VISTA GIORNO E APPUNTAMENTI
-   ========================================================================== */
+ */
 
 /* BB Struttura Day View */
 #day-view {
@@ -640,9 +640,9 @@ input[type="time"]:valid {
 }
 
 
-/* ==========================================================================
+/*
    AA SEZIONE 7: ANAGRAFICA MEDICI (CLIENTS VIEW)
-   ========================================================================== */
+ */
 
 /* BB Struttura Anagrafica */
 #clients-view {
@@ -876,9 +876,9 @@ input[type="time"]:valid {
     width: 16px;
 }
 
-/* ==========================================================================
+/*
    AA SEZIONE 8: SISTEMA DI AUTENTICAZIONE (LOGIN)
-   ========================================================================== */
+ */
 
 /* BB Layout Login */
 .login-body {
@@ -998,9 +998,9 @@ input[type="time"]:valid {
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25) !important;
 }
 
-/* ==========================================================================
+/*
    AA SEZIONE 9: VISTA TASK (TO-DO LIST)
-   ========================================================================== */
+ */
 
 #tasks-container {
     display: flex;
@@ -1180,9 +1180,9 @@ input[type="time"]:valid {
     color: var(--text-main);
 }
 
-/* ==========================================================================
+/*
    AA SEZIONE 10: UTILITY
-   ========================================================================== */
+ */
 
 /* BB Classi Utility */
 .display-none {
@@ -1242,9 +1242,9 @@ input[type="time"]:valid {
     height: 24px;
 }
 
-/* ==========================================================================
+/*
    AA SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP)
-   ========================================================================== */
+ */
 
 /* CC SM: Schermi piccoli (Smartphone >= 576px) */
 @media (min-width: 576px) {
@@ -1341,9 +1341,9 @@ input[type="time"]:valid {
 
 /* CC MD DOWN: Tablet e Mobile (<= 991.98px) */
 
-/* ==========================================================================
+/*
    AA 11: LED STATO DI RETE (ONLINE / OFFLINE / SYNC)
-   ========================================================================== */
+ */
 
 .status-led {
     min-width: 12px;
@@ -1399,9 +1399,9 @@ input[type="time"]:valid {
 }
 
 
-/* ==========================================================================
+/*
    AA 12: STATI DI CARICAMENTO (SKELETON & BUTTONS)
-   ========================================================================== */
+ */
 
 /* BB: Skeleton Loading per i contenuti (Card, Task, ecc) */
 .skeleton-box {
