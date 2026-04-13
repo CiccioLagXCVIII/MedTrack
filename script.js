@@ -656,9 +656,9 @@ async function openAddTaskModal() {
     openModal('modal-add-task');
 }
 
-// BB Salvataggio Task
+// BB Salvataggio Task (Supporto Offline Totale)
 async function saveTask() {
-    const id = document.getElementById('task-id-hidden').value;
+    let id = document.getElementById('task-id-hidden').value;
     const type = document.querySelector('input[name="taskType"]:checked').value;
     const priorita = parseInt(document.getElementById('task-priorita').value);
     const medico_id = document.getElementById('task-medico-link').value || null;
@@ -666,37 +666,61 @@ async function saveTask() {
     let titolo = "";
     let descrizione = null;
 
-    // Costruzione dinamica in base al tipo
     if (type === 'gen') {
+        // CC Task Generica
         titolo = document.getElementById('task-titolo').value.trim();
         const noteInput = document.getElementById('task-note').value.trim();
         if (noteInput) descrizione = noteInput;
         if (!titolo) return openAlert("Inserisci un titolo per l'attività.");
     } else {
+        // CC Task Collegata A Medico (Chiamata o Appuntamento)
         if (!medico_id) return openAlert("Devi Selezionare Un Medico Per Questo Tipo Di Attività");
         const medico = clientsList.find(c => c.id === medico_id);
         const nomeMedico = medico ? medico.name : "Medico Sconosciuto";
-
-        if (type === 'call') {
-            titolo = `Chiamare ${nomeMedico}`;
-        } else if (type === 'appt') {
-            titolo = `Prendere Appuntamento Con ${nomeMedico}`;
-        }
+        titolo = type === 'call' ? `Chiamare ${nomeMedico}` : `Prendere Appuntamento Con ${nomeMedico}`;
     }
 
-    const payload = { titolo, descrizione, priorita, medico_id };
+    const payload = {
+        titolo,
+        descrizione,
+        priorita,
+        medico_id
+    };
 
-    if (id) {
-        // Modifica
-        await executeDBAction('UPDATE', 'tasks', payload, { id: id });
-    } else {
-        // Nuovo Inserimento
+    // CC Se Il Task È Nuovo Genero Un ID Temporaneo
+    if (!id) {
+        id = crypto.randomUUID();
+        payload.id = id;
+        payload.completato = false;
         await executeDBAction('INSERT', 'tasks', payload);
+    } else {
+        await executeDBAction('UPDATE', 'tasks', payload, { id: id });
     }
 
-    // CC Imposto Flag Di Refresh
-    appState.tasksNeedsRefresh = true;
+    // CC Gestione Offline Immediata Per UI (Aggiornamento Memoria RAM E Cache)
+    if (!navigator.onLine) {
+        const medicoInfo = medico_id ? clientsList.find(c => c.id === medico_id) : null;
+        const taskPerUI = {
+            ...payload,
+            id: id,
+            medici: medicoInfo ? { nome: medicoInfo.name } : null
+        };
 
+        const existingIndex = tasksList.findIndex(t => t.id === id);
+        if (existingIndex !== -1) {
+            tasksList[existingIndex] = { ...tasksList[existingIndex], ...taskPerUI };
+        } else {
+            tasksList.push(taskPerUI);
+        }
+
+        // CC Salvo In Cache Cosi Anche Ricaricando Non La Si Perde
+        if (typeof saveToOfflineCache === 'function') {
+            saveToOfflineCache('tasksData', tasksList);
+        }
+        openAlert("Task Salvato Offline. Verrà Sincronizzato Appena Torna La Rete.");
+    }
+
+    appState.tasksNeedsRefresh = true;
     closeModal('modal-add-task');
     renderTasks();
 }
@@ -718,52 +742,52 @@ function toggleTaskType() {
     }
 }
 
-// BB Rendering Task Evoluto (Con Filtri e Offline)
+// BB Rendering Task Evoluto (Con Filtri, Correzione Bug e Offline Cache)
 async function renderTasks() {
     const container = document.getElementById('tasks-container');
-    let tasks = [];
 
     // CC Logica Online / Offline Per i Task
     if (!navigator.onLine) {
         const cachedTasks = await getFromOfflineCache('tasksData');
         console.log("📡 Modalità Offline: Caricamento Tasks Da Cache", cachedTasks);
-
         tasksList = cachedTasks || [];
     } else {
         const { data, error } = await sb.from('tasks').select('*, medici(nome)');
-
         if (!error) {
-            taskList = data;
+            tasksList = data || []; // Assegna i dati alla variabile globale
             if (typeof saveToOfflineCache === 'function') {
-                saveToOfflineCache('tasksData', data);
+                saveToOfflineCache('tasksData', tasksList); // Aggiorna la cache
             }
         }
     }
 
-    let filteredTasks = [...tasks];
+    // CC Clonazione tasksList 
+    let filteredTasks = [...tasksList];
 
-    // Acquisizione Valori (Con Fallback)
+    // Acquisizione Valori Filtri
     const statusF = document.getElementById('filter-task-status').value || 'todo';
     const prioF = document.getElementById('sort-task-prio').value || 'desc';
     const contextF = document.getElementById('filter-task-context').value || 'all';
 
-    // Applicazione Filtro STATO
-    if (statusF === 'todo') filteredTasks = filteredTasks.filter(t => !t.completato);
+    // CC Applicazione Filtro STATO
+    if (statusF === 'todo') {
+        filteredTasks = filteredTasks.filter(t => !t.completato);
+    }
 
-    // 4. Applicazione Filtro CONTESTO
+    // CC Applicazione Filtro CONTESTO
     if (contextF === 'medici') {
         filteredTasks = filteredTasks.filter(t => t.medico_id !== null);
     } else if (contextF === 'admin') {
         filteredTasks = filteredTasks.filter(t => t.medico_id === null);
     }
 
-    // Applicazione Ordinamento PRIORITÀ
+    // CC Applicazione Ordinamento PRIORITÀ
     filteredTasks.sort((a, b) => {
         if (a.completato !== b.completato) return a.completato ? 1 : -1;
         return prioF === 'desc' ? b.priorita - a.priorita : a.priorita - b.priorita;
     });
 
-    // Rendering A Schermo
+    // CC Rendering A Schermo
     container.innerHTML = filteredTasks.length ? filteredTasks.map(t => `
         <div class="task-card ${t.completato ? 'task-done' : ''} task-prio-${t.priorita} shadow-sm">
             <div class="d-flex align-items-center w-100">
@@ -786,40 +810,55 @@ async function renderTasks() {
     lucide.createIcons();
 }
 
-// BB Toggle Stato Task
+// BB Toggle Stato Task (Supporto Offline)
 async function toggleTask(id, attualeStato) {
+    // CC Aggiungi In Coda Oppure Esegui Subito A Seconda Che Siamo Online O Offline
     await executeDBAction('UPDATE', 'tasks', { completato: !attualeStato }, { id: id });
+
     // CC Aggiornamento UI Immediato
-    // Cerchiamo il task in RAM e invertiamo lo stato
     const taskIndex = tasksList.findIndex(t => t.id === id);
     if (taskIndex !== -1) {
         tasksList[taskIndex].completato = !attualeStato;
     }
 
-    // CC Forza Refresh Della Lista Con I Nuovi Dati
-    appState.tasksNeedsRefresh = true;
+    // CC Se Offline Salva In IndexedDB Così Sopravvive Al Refresh E Si Sincronizza Appena Torna La Rete
+    if (!navigator.onLine && typeof saveToOfflineCache === 'function') {
+        saveToOfflineCache('tasksData', tasksList);
+    }
+
+    // CC Con Flag false Per Non Fare Fetch Dal DB Se Siamo Offline
+    // CC (Altrimenti Se Supabase È Lento A Rispondere, Il Task Torna Visivamente Allo Stato Precedente Per Un Millisecondo)
+    appState.tasksNeedsRefresh = false;
+
+    // CC Aggiornamento UI
     renderTasks();
 }
 
 
-// BB Eliminazione Task
+// BB Eliminazione Task (Supporto Offline)
 async function deleteTask(id) {
     const desc = document.getElementById('modal-confirm-desc');
     const confirmBtn = document.getElementById('btn-execute-confirm');
 
-    // CC Impostazione Testo Modal
+    // CC Modal Di Conferma Eliminazione
     desc.innerText = "Vuoi Eliminare Questa Attività? Questa Azione Non Può Essere Annullata.";
-
-    // CC Apre Modal
     openModal('modal-confirm');
 
-    // CC Assegna Azione Al Bottone Di Conferma
     confirmBtn.onclick = async () => {
-        // Esegui eliminazione
+        // Esegui o metti in coda l'eliminazione
         await executeDBAction('DELETE', 'tasks', null, { id: id });
-        // CC Imposto Flag Di Refresh
-        appState.tasksNeedsRefresh = true;
-        // CC Chiusura Modal E Refresh Lista
+
+        // Aggiorna la RAM locale rimuovendo il task
+        tasksList = tasksList.filter(t => t.id !== id);
+
+        // Se offline, aggiorna la cache locale per far sparire il task
+        if (!navigator.onLine && typeof saveToOfflineCache === 'function') {
+            saveToOfflineCache('tasksData', tasksList);
+            openAlert("Task eliminato offline.");
+        }
+
+        // CC Si Può Evitare Di Fare Il Fetch Perché La RAM È Già Aggiornata
+        appState.tasksNeedsRefresh = false;
         closeModal('modal-confirm');
         renderTasks();
     };
