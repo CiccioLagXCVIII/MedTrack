@@ -9,6 +9,7 @@ dayjs.locale('it');
 // BB Variabili di Stato dell'Applicazione
 let clientsList = [];               // Lista completa dei medici (anagrafica)
 let allVisits = [];                 // Tutte le visite caricate dal DB
+let tasksList = [];                 // Lista completa delle attività (tasks)
 let appointments = {};              // Mappa delle visite indicizzate per data ISO
 let walkinQueue = [];               // Coda dei medici che ricevono senza appuntamento
 let currentDate = dayjs();          // Data attualmente visualizzata nel calendario
@@ -184,6 +185,7 @@ async function loadAllDataFromSupabase() {
 
     // CC Scenario Offline: Proviamo a Caricare Dati dalla Cache
     if (!navigator.onLine) {
+        console.log("📡 Modalità Offline: Tentativo Caricamento Anagrafica Da Cache");
         const cachedData = await getFromOfflineCache('clientsData');
         if (cachedData) {
             clientsList = cachedData;
@@ -724,18 +726,17 @@ async function renderTasks() {
     // CC Logica Online / Offline Per i Task
     if (!navigator.onLine) {
         const cachedTasks = await getFromOfflineCache('tasksData');
-        if (cachedTasks) {
-            tasks = cachedTasks;
-        } else {
-            return; // Se Cache Vuoto, Non Mostriamo Nulla (Potremmo Aggiungere Un Messaggio In Futuro)
-        }
+        console.log("📡 Modalità Offline: Caricamento Tasks Da Cache", cachedTasks);
+
+        tasksList = cachedTasks || [];
     } else {
         const { data, error } = await sb.from('tasks').select('*, medici(nome)');
-        if (error) return;
-        tasks = data;
-        // Se C'È Connessione, Aggiorniamo La Cache Con I Dati Più Recenti
-        if (typeof saveToOfflineCache === 'function') {
-            saveToOfflineCache('tasksData', tasks);
+
+        if (!error) {
+            taskList = data;
+            if (typeof saveToOfflineCache === 'function') {
+                saveToOfflineCache('tasksData', data);
+            }
         }
     }
 
@@ -790,9 +791,9 @@ async function toggleTask(id, attualeStato) {
     await executeDBAction('UPDATE', 'tasks', { completato: !attualeStato }, { id: id });
     // CC Aggiornamento UI Immediato
     // Cerchiamo il task in RAM e invertiamo lo stato
-    const taskIndex = tasks.findIndex(t => t.id === id);
+    const taskIndex = tasksList.findIndex(t => t.id === id);
     if (taskIndex !== -1) {
-        tasks[taskIndex].completato = !attualeStato;
+        tasksList[taskIndex].completato = !attualeStato;
     }
 
     // CC Forza Refresh Della Lista Con I Nuovi Dati
@@ -871,41 +872,53 @@ async function executeDBAction(op, table, payload, matchCriteria = null) {
             query = sb.from(table).insert(payload);
         } else if (operation === 'UPDATE') {
             query = sb.from(table).update(payload);
-            // DD: Applicazione dei filtri di corrispondenza (Es: .eq('id', '...'))
             for (const [key, val] of Object.entries(matchCriteria)) {
                 query = query.eq(key, val);
             }
         } else if (operation === 'DELETE') {
             query = sb.from(table).delete();
-            // DD: Applicazione dei filtri di corrispondenza per la cancellazione
             for (const [key, val] of Object.entries(matchCriteria)) {
                 query = query.eq(key, val);
             }
         }
 
-        // DD: Esecuzione effettiva della query e gestione risultato
         return await query;
 
     } else {
         // CC OFFLINE: Aggiungi Operazione Alla Coda Di Sincronizzazione
         await addToSyncQueue(op, table, payload, matchCriteria);
 
-        // CC Aggiornamento UI Immediato (Salva In RAM)
-
-        // DD: Gestione Inserimento (INSERT) In Locale
+        // CC OFFLINE: Aggiorna La Cache Così Sopravvive Al Refresh Della Pagina
         if (op === 'INSERT' && table === 'medici') {
-            const tempID = crypto.randomUUID();
-            clientsList.push({ id: tempID, ...payload });
+            const cachedClients = await getFromOfflineCache('clientsData') || [];
+            cachedClients.push({
+                id: payload.id,
+                name: payload.nome,
+                city: payload.citta,
+                address: payload.indirizzo,
+                phone: payload.cellulare,
+                specialization: payload.specializzazione
+            });
+            await saveToOfflineCache('clientsData', cachedClients);
+        }
+
+        if (op === 'INSERT' && table === 'visite') {
+            const cachedVisits = await getFromOfflineCache('visitsData') || [];
+            cachedVisits.push({
+                id: crypto.randomUUID(), // ID temporaneo per la vista
+                medico_id: payload.medico_id,
+                data_visita: payload.data_visita,
+                ora_visita: payload.ora_visita,
+                note: ""
+            });
+            await saveToOfflineCache('visitsData', cachedVisits);
+        }
+
+        if (op === 'DELETE' && table === 'medici' && matchCriteria?.id) {
+            clientsList = clientsList.filter(c => c.id !== matchCriteria.id);
             renderClients();
         }
 
-        // DD: Gestione Cancellazione (DELETE) In Locale
-        if (op === 'DELETE' && table === 'medici' && matchCriteria?.id) {
-            clientsList = clientsList.filter(c => c.id !== matchCriteria.id);
-            renderClients(); // Aggiorna La Vista Immediatamente
-        }
-
-        // DD: Ritorno Simulato Per Non Bloccare La Logica Della Funzione Che La Chiama
         return { data: [payload], error: null };
     }
 }
@@ -914,9 +927,11 @@ async function executeDBAction(op, table, payload, matchCriteria = null) {
 async function addAppointment() {
     const isNew = document.querySelector('input[name="clientType"]:checked').value === 'new';
     let clientId;
+    let nomeMedico = "";
+    let cittaMedico = "";
 
     if (isNew) {
-        // CC Creazione nuovo medico al volo
+        // CC Creazione Nuovo Medico Tramite Acquisizione Dati Dal Form
         const nome = document.getElementById('new-client-name').value.trim();
         const citta = document.getElementById('new-client-city').value.trim();
         const indirizzo = document.getElementById('new-client-address').value.trim();
@@ -926,10 +941,13 @@ async function addAppointment() {
         if (spec === 'NEW_SPEC') spec = document.getElementById('custom-spec-input').value.trim();
         if (!nome || !spec) return openAlert("Nome E Specializzazione Sono Obbligatori.");
 
-        const tempID = crypto.randomUUID();
+        // DD Generazione UUID Locale Per Linkare Medico Alla Visita
+        clientId = crypto.randomUUID();
+        nomeMedico = nome;
+        cittaMedico = citta;
 
         const medicoPayload = {
-            id: tempID, // Passiamo L'ID Generato Con Crypto
+            id: clientId,
             nome,
             citta,
             indirizzo,
@@ -939,41 +957,88 @@ async function addAppointment() {
 
         const response = await executeDBAction('INSERT', 'medici', medicoPayload);
 
-        // Operatore ?. È Il Null Safe Di JS. Se response è null O undefined Non Genera Errore Ma Si Limita A Restituire undefined, Evitando Crash In Caso Di Problemi Di Connessione O Altri Errori
         if (response?.error) {
             return openAlert("Errore Durante Inserimento Nuovo Medico");
         } else {
-            // Uso L'ID Temporaneo Per Aggiornare Immediatamente La UI,
-            // Verrà Sostituito Con Quello Reale Al Momento Della Sincronizzazione
-            clientId = tempID;
-
-            if (navigator.onLine) {
-                openAlert("Medico Aggiunto Con Successo!");
-            } else {
-                openAlert("Medico In Attesa. Appena Online Sarà Sincronizzato.");
-            }
+            // CC Aggiunta Alla Lista Locale In Modo Da Mostrarlo Nella UI
+            clientsList.push({
+                id: clientId,
+                name: nome,
+                city: citta,
+                specialization: spec,
+                address: indirizzo,
+                phone: cellulare
+            });
+            updateExistingClientsSelect();
         }
+    } else {
+        // CC Caso Medico Esistente: Recupero ID Dal Select
+        clientId = document.getElementById('existing-client-select').value;
+        if (!clientId) return openAlert("Seleziona Un Medico Dalla Lista");
 
+        // Prelevo Dati Da Lista In RAM
+        const medico = clientsList.find(c => c.id === clientId);
+        nomeMedico = medico ? medico.name : "Sconosciuto";
+        cittaMedico = medico ? medico.city : "";
     }
 
+    // CC Salvataggio Visita
     if (currentTab === 'scheduled') {
-        // CC Salvataggio visita con orario
         const time = document.getElementById('appointment-time').value;
         if (!time) return openAlert("Inserisci Orario Visita.");
-        await executeDBAction('INSERT', 'visite', { medico_id: clientId, data_visita: selectedDateISO, ora_visita: time });
+
+        // Salvataggio nel DB (o in coda se offline)
+        await executeDBAction('INSERT', 'visite', {
+            medico_id: clientId,
+            data_visita: selectedDateISO,
+            ora_visita: time
+        });
+
+
+        if (!navigator.onLine) {
+            // DD Offline: Inserisco Manualmente L'Appuntamento Nella Vista
+            if (!appointments[selectedDateISO]) appointments[selectedDateISO] = { scheduled: [] };
+
+            appointments[selectedDateISO].scheduled.push({
+                id: clientId,
+                name: nomeMedico,
+                city: cittaMedico,
+                time: time,
+                note: "",
+                dbId: crypto.randomUUID(), // Genera Un ID Finto Per La Lista
+                isWalkinDone: false
+            });
+
+            openAlert("Salvato In Locale. Sarà Sincronizzato Appena Torna Internet!");
+            renderDayAppointments();
+            resetForm();
+
+        } else {
+            // DD Online: Ricarichiamo Da Supabase Per Avere ID Reale E Relazioni
+            await loadMonthDataFromSupabase(currentDate);
+            openAlert("Appuntamento Aggiunto Con Successo!");
+            renderDayAppointments();
+            resetForm();
+        }
+
     } else {
-        // CC Salvataggio giorni di ricevimento (Walk-in)
+        // CC Salvataggio Giorni Di Ricevimento (Walk-in)
         const checkboxes = document.querySelectorAll('#available-days-checkboxes input:checked');
         const days = Array.from(checkboxes).map(cb => cb.value).join(',');
         await executeDBAction('UPDATE', 'medici', { giorni_liberi: days }, { id: clientId });
+
+        if (!navigator.onLine) {
+            openAlert("Giorni Liberi Salvati In Locale. Saranno Sincronizzati Appena Torna Internet!");
+        } else {
+            await loadMonthDataFromSupabase(currentDate);
+            openAlert("Giorni Liberi Aggiornati!");
+        }
+        resetForm();
     }
 
     // CC Imposto Flag Di Refresh
     appState.calendarNeedsRefresh = true;
     appState.clientsNeedsRefresh = true;
-
-    await loadMonthDataFromSupabase(currentDate);
-    openDayView(selectedDateISO);
 }
 
 // BB Modifiche Medici e Visite
@@ -1091,10 +1156,11 @@ async function askDeleteClient(clientId, clientName) {
 
 // BB Cancellazione Appuntamento Con Conferma
 async function deleteApp(visitDbId) {
+    console.log("Click rilevato per ID:", visitDbId);
     const desc = document.getElementById('modal-confirm-desc');
     const confirmBtn = document.getElementById('btn-execute-confirm');
 
-    desc.innerText = `Vuoi cancellare questo appuntamento?`;
+    desc.innerText = `Vuoi Cancellare Questo Appuntamento?`;
     openModal('modal-confirm');
 
     confirmBtn.onclick = async () => {
@@ -1104,6 +1170,9 @@ async function deleteApp(visitDbId) {
         appState.calendarNeedsRefresh = true;
         appState.clientsNeedsRefresh = true;
 
+        allVisits = allVisits.filter(v => v.dbId !== visitDbId);
+        processVisitsForCalendar(); // Ricalcola la mappa
+        renderDayAppointments();
         closeModal('modal-confirm');
         await loadMonthDataFromSupabase(currentDate);
         openDayView(selectedDateISO);

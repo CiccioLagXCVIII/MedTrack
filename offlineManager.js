@@ -49,59 +49,82 @@ async function clearSyncQueue() {
     db.transaction(QUEUE_STORE, 'readwrite').objectStore(QUEUE_STORE).clear();
 }
 
-// MODIFICA IN offlineManager.js
 async function processSyncQueue() {
     if (!navigator.onLine) return;
+
     const queue = await getSyncQueue();
     if (queue.length === 0) return;
 
     console.log(`🚀 Sincronizzazione Di ${queue.length} Elementi...`);
+    updateNetworkLED('syncing'); // Accende LED Blu
 
-    // Accendi LED Blu Di Sincronizzazione
-    updateNetworkLED('syncing');
+    // FONDAMENTALE: Diamo 1.5 secondi a Supabase per ripristinare il token Auth dopo il ritorno online
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Uso L'Istanza DB Per Cancellare I Singoli Elementi
     const db = await initIndexedDB();
 
     for (const item of queue) {
-        let query;
-        const op = item.operation.toUpperCase();
+        try {
+            let query;
+            const op = item.operation.toUpperCase();
 
-        if (op === 'INSERT') {
-            query = sb.from(item.table).insert(item.payload);
-        } else if (op === 'UPDATE') {
-            query = sb.from(item.table).update(item.payload);
-            for (const [key, val] of Object.entries(item.matchCriteria)) {
-                query = query.eq(key, val);
+            if (op === 'INSERT') {
+                query = sb.from(item.table).insert(item.payload);
+            } else if (op === 'UPDATE') {
+                query = sb.from(item.table).update(item.payload);
+                for (const [key, val] of Object.entries(item.matchCriteria)) {
+                    query = query.eq(key, val);
+                }
+            } else if (op === 'DELETE') {
+                query = sb.from(item.table).delete();
+                for (const [key, val] of Object.entries(item.matchCriteria)) {
+                    query = query.eq(key, val);
+                }
             }
-        } else if (op === 'DELETE') {
-            query = sb.from(item.table).delete();
-            for (const [key, val] of Object.entries(item.matchCriteria)) {
-                query = query.eq(key, val);
-            }
-        }
 
-        const { error } = await query;
-        if (error) {
-            console.error("Sync Fallita per item:", item, error);
-            // Non Cancellare L'Item, Che Rimane Per Il Prossimo Tentativo
-        } else {
-            // Cancella Solo L'Item Caricato Correttamente Nel DB
-            db.transaction(QUEUE_STORE, 'readwrite').objectStore(QUEUE_STORE).delete(item.id);
+            const { error } = await query;
+
+            if (error) {
+                console.error(`❌ Sync Fallita Per ${item.table}:`, error);
+                // In caso di errore spegniamo il LED (evita l'effetto loop) e interrompiamo.
+                // L'elemento rimane in coda per il prossimo tentativo.
+                updateNetworkLED('online');
+                return;
+            }
+
+            // ✅ SUCCESSO: Elimina SOLO questo elemento dalla coda di IndexedDB
+            await new Promise(res => {
+                const req = db.transaction(QUEUE_STORE, 'readwrite').objectStore(QUEUE_STORE).delete(item.id);
+                req.onsuccess = () => res();
+            });
+
+            console.log(`✅ Sincronizzato ${op} Per ${item.table}`);
+
+        } catch (err) {
+            console.error("Errore Critico Durante La Sincronizzazione:", err);
+            updateNetworkLED('online');
+            return;
         }
     }
 
-    // Ricarica Lo Stato Della Web App Dopo La Sincronizzazione
-    appState.calendarNeedsRefresh = true;
-    appState.clientsNeedsRefresh = true;
-    appState.tasksNeedsRefresh = true;
-    console.log("✅ Sincronizzazione Completata!");
-    updateNetworkLED('online');
-    openAlert("Sincronizzazione Avvenuta Con Successo!", "success");
+    console.log("✅ Sincronizzazione Completata Con Successo!");
+    updateNetworkLED('online'); // Torna LED Verde
 
-    // Ricarica Solo I Dati Necessari Per Aggiornare L'Interfaccia Utente Evitando Ricariche Inutili
-    if (appState.calendarNeedsRefresh) loadMonthDataFromSupabase(currentDate);
-    if (appState.clientsNeedsRefresh) loadAllDataFromSupabase();
+    // Ricarichiamo i dati a schermo per allinearli al Server
+    if (typeof appState !== 'undefined') {
+        appState.calendarNeedsRefresh = true;
+        appState.clientsNeedsRefresh = true;
+        appState.tasksNeedsRefresh = true;
+
+        // Aggiorna visivamente la pagina in cui ci troviamo
+        if (document.getElementById('calendar-view').classList.contains('active')) {
+            await loadMonthDataFromSupabase(currentDate);
+        } else if (document.getElementById('clients-view').classList.contains('active')) {
+            await loadAllDataFromSupabase();
+        } else if (document.getElementById('tasks-view').classList.contains('active')) {
+            await renderTasks();
+        }
+    }
 }
 
 // Network Listener
