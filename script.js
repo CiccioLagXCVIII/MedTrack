@@ -222,7 +222,7 @@ async function loadAllDataFromSupabase() {
 
             // CC Salvataggio Nella Memoria Del Telefono (Offline Cache)
             if (typeof saveToOfflineCache === 'function') {
-                saveToOfflineCache('clientsData', clientsList);
+                await saveToOfflineCache('clientsData', clientsList);
             }
 
             updateSpecDropdowns();
@@ -765,7 +765,7 @@ async function renderTasks() {
     let filteredTasks = [...tasksList];
 
     // Acquisizione Valori Filtri
-    const statusF = document.getElementById('filter-task-status').value || 'todo';
+    const statusF = document.getElementById('filter-task-status').value || 'all';
     const prioF = document.getElementById('sort-task-prio').value || 'desc';
     const contextF = document.getElementById('filter-task-context').value || 'all';
 
@@ -789,24 +789,24 @@ async function renderTasks() {
 
     // CC Rendering A Schermo
     container.innerHTML = filteredTasks.length ? filteredTasks.map(t => `
-        <div class="task-card ${t.completato ? 'task-done' : ''} task-prio-${t.priorita} shadow-sm">
-            <div class="d-flex align-items-center w-100">
-                <button class="task-checkbox" onclick="toggleTask('${t.id}', ${t.completato})">
-                    <i data-lucide="check" class="check-icon"></i>
-                </button>
-                <div class="task-content flex-grow-1 ms-3">
-                    <h6 class="task-title mb-1">${escapeHTML(t.titolo)}</h6>
-                    ${t.descrizione ? `<div class="text-muted small mb-1 fst-italic border-start border-2 ps-2 border-secondary opacity-75">${escapeHTML(t.descrizione)}</div>` : ''}
-                    ${t.medici ? `<div class="task-meta text-primary fw-semibold"><i data-lucide="user" class="icon-xs"></i> ${t.medici.nome}</div>` : ''}
-                </div>
-                <div class="task-actions d-flex gap-1 ms-2">
-                    <button class="btn-task-icon text-secondary" onclick="editTask('${t.id}')"><i data-lucide="edit-2"></i></button>
-                    <button class="btn-task-icon text-danger" onclick="deleteTask('${t.id}')"><i data-lucide="trash-2"></i></button>
-                </div>
+    <div class="task-card ${t.completato ? 'task-done' : ''} task-prio-${t.priorita} shadow-sm">
+        <div class="d-flex align-items-center w-100">
+            <button class="task-checkbox" onclick="toggleTask('${t.id}', ${t.completato})">
+                <i data-lucide="check" class="check-icon"></i>
+            </button>
+            <div class="task-content flex-grow-1 ms-3">
+                <h6 class="task-title mb-1">${escapeHTML(t.titolo)}</h6>
+                ${t.descrizione ? `<div class="text-muted small mb-1 fst-italic border-start border-2 ps-2 border-secondary opacity-75">${escapeHTML(t.descrizione)}</div>` : ''}
+                <!-- FIX QUI: Aggiunto il punto interrogativo per evitare crash se medici è null -->
+                ${t.medici?.nome ? `<div class="task-meta text-primary fw-semibold"><i data-lucide="user" class="icon-xs"></i> ${escapeHTML(t.medici.nome)}</div>` : ''}
+            </div>
+            <div class="task-actions d-flex gap-1 ms-2">
+                <button class="btn-task-icon text-secondary" onclick="editTask('${t.id}')"><i data-lucide="edit-2"></i></button>
+                <button class="btn-task-icon text-danger" onclick="deleteTask('${t.id}')"><i data-lucide="trash-2"></i></button>
             </div>
         </div>
+    </div>
     `).join('') : `<div class="text-center py-5 mt-2"><p class="text-muted small">Nessun Task trovato.</p></div>`;
-
     lucide.createIcons();
 }
 
@@ -854,7 +854,7 @@ async function deleteTask(id) {
         // Se offline, aggiorna la cache locale per far sparire il task
         if (!navigator.onLine && typeof saveToOfflineCache === 'function') {
             saveToOfflineCache('tasksData', tasksList);
-            openAlert("Task eliminato offline.");
+            openAlert("Task Eliminato Offline. Verrà Rimosso Definitivamente Appena Torna La Rete.");
         }
 
         // CC Si Può Evitare Di Fare Il Fetch Perché La RAM È Già Aggiornata
@@ -866,7 +866,14 @@ async function deleteTask(id) {
 
 // BB Modifica Task
 async function editTask(id) {
-    const { data: task } = await sb.from('tasks').select('*').eq('id', id).single();
+    let task;
+    if (navigator.onLine) {
+        const { data } = await sb.from('tasks').select('*').eq('id', id).single();
+        task = data;
+    } else {
+        // Se Offline Cerca In Memoria
+        task = tasksList.find(t => t.id === id);
+    }
     if (!task) return;
 
     if (clientsList.length === 0) {
@@ -903,7 +910,8 @@ async function editTask(id) {
 // BB Smart Router: Decide se scrivere su Supabase o in Offline Queue
 async function executeDBAction(op, table, payload, matchCriteria = null) {
     if (navigator.onLine) {
-        // CC ONLINE: Esegui Query Su Supabase
+        // CC ONLINE
+        // DD Esegui Query Su Supabase
         let query;
         const operation = op.toUpperCase();
 
@@ -924,40 +932,93 @@ async function executeDBAction(op, table, payload, matchCriteria = null) {
         return await query;
 
     } else {
-        // CC OFFLINE: Aggiungi Operazione Alla Coda Di Sincronizzazione
+        // CC OFFLINE
+        // DD Aggiungi Operazione Alla Coda Di Sincronizzazione
         await addToSyncQueue(op, table, payload, matchCriteria);
 
-        // CC OFFLINE: Aggiorna La Cache Così Sopravvive Al Refresh Della Pagina
+        // DD Aggiorna La Cache Così Sopravvive Al Refresh Della Pagina
         if (op === 'INSERT' && table === 'medici') {
-            const cachedClients = await getFromOfflineCache('clientsData') || [];
-            cachedClients.push({
+            clientsList.push({
                 id: payload.id,
                 name: payload.nome,
                 city: payload.citta,
                 address: payload.indirizzo,
                 phone: payload.cellulare,
-                specialization: payload.specializzazione
+                specialization: payload.specializzazione,
+                lastVisit: null,
+                nextVisit: null,
+                lastNote: null
             });
-            await saveToOfflineCache('clientsData', cachedClients);
+            await saveToOfflineCache('clientsData', clientsList);
         }
 
         if (op === 'INSERT' && table === 'visite') {
-            const cachedVisits = await getFromOfflineCache('visitsData') || [];
-            cachedVisits.push({
-                id: crypto.randomUUID(), // ID temporaneo per la vista
+            const medico = clientsList.find(c => c.id === payload.medico_id);
+            allVisits.push({
+                id: crypto.randomUUID(), // ID temporaneo 
+                dbId: crypto.randomUUID(),
                 medico_id: payload.medico_id,
                 data_visita: payload.data_visita,
                 ora_visita: payload.ora_visita,
-                note: ""
+                note: payload.note || "",
+                is_walkin_done: payload.is_walkin_done || false,
+                medici: medico ? { nome: medico.name, citta: medico.city, cellulare: medico.phone, indirizzo: medico.address } : null
             });
-            await saveToOfflineCache('visitsData', cachedVisits);
+            await saveToOfflineCache('visitsData', allVisits);
+        }
+
+        if (op === 'UPDATE' && table === 'medici' && matchCriteria?.id) {
+            const idx = clientsList.findIndex(c => c.id === matchCriteria.id);
+            if (idx !== -1) {
+                clientsList[idx] = { ...clientsList[idx], name: payload.nome || clientsList[idx].name, city: payload.citta || clientsList[idx].city, phone: payload.cellulare || clientsList[idx].phone, specialization: payload.specializzazione || clientsList[idx].specialization, giorni_liberi: payload.giorni_liberi || clientsList[idx].giorni_liberi };
+                await saveToOfflineCache('clientsData', clientsList);
+            }
+        }
+
+        if (op === 'UPDATE' && table === 'visite') {
+            let idx = -1;
+            if (matchCriteria?.id) { // Modifica per Note
+                idx = allVisits.findIndex(v => v.id === matchCriteria.id || v.dbId === matchCriteria.id);
+            } else if (matchCriteria?.medico_id && matchCriteria?.data_visita) { // Modifica Sposta Data
+                idx = allVisits.findIndex(v => v.medico_id === matchCriteria.medico_id && v.data_visita === matchCriteria.data_visita);
+            }
+            if (idx !== -1) {
+                allVisits[idx] = { ...allVisits[idx], ...payload };
+                await saveToOfflineCache('visitsData', allVisits);
+            }
         }
 
         if (op === 'DELETE' && table === 'medici' && matchCriteria?.id) {
             clientsList = clientsList.filter(c => c.id !== matchCriteria.id);
-            renderClients();
+            allVisits = allVisits.filter(v => v.medico_id !== matchCriteria.id);
+            await saveToOfflineCache('clientsData', clientsList);
+            await saveToOfflineCache('visitsData', allVisits);
         }
 
+        if (op === 'DELETE' && table === 'visite' && matchCriteria?.id) {
+            allVisits = allVisits.filter(v => v.id !== matchCriteria.id && v.dbId !== matchCriteria.id);
+            await saveToOfflineCache('visitsData', allVisits);
+        }
+
+        // DD Gestione Task
+        // FIX: Gestione specifica per i Task in modalità Offline
+        if (table === 'tasks') {
+            if (op === 'INSERT') {
+                const medicoInfo = payload.medico_id ? clientsList.find(c => c.id === payload.medico_id) : null;
+                tasksList.push({
+                    ...payload,
+                    id: payload.id || crypto.randomUUID(),
+                    completato: false,
+                    medici: medicoInfo ? { nome: medicoInfo.name } : null
+                });
+            } else if (op === 'UPDATE') {
+                const idx = tasksList.findIndex(t => t.id === matchCriteria.id);
+                if (idx !== -1) tasksList[idx] = { ...tasksList[idx], ...payload };
+            } else if (op === 'DELETE') {
+                tasksList = tasksList.filter(t => t.id !== matchCriteria.id);
+            }
+            await saveToOfflineCache('tasksData', tasksList);
+        }
         return { data: [payload], error: null };
     }
 }
@@ -1080,6 +1141,43 @@ async function addAppointment() {
     appState.clientsNeedsRefresh = true;
 }
 
+// Conferma l'inserimento (Funziona anche Offline)
+async function confirmNewVisitFromAnagrafica() {
+    const date = document.getElementById('new-visit-date').value;
+    const time = document.getElementById('new-visit-time').value;
+
+    if (!date || !time) return openAlert("Inserisci data e ora");
+
+    const payload = {
+        medico_id: modalTargetId,
+        data_visita: date,
+        ora_visita: time,
+        note: ""
+    };
+
+    // Il nostro router executeDBAction gestirà la coda se sei offline
+    await executeDBAction('INSERT', 'visite', payload);
+
+    closeModal('modal-add-visit');
+
+    // Aggiorniamo la UI locale
+    appState.clientsNeedsRefresh = true;
+    appState.calendarNeedsRefresh = true;
+
+    if (navigator.onLine) {
+        await loadAllDataFromSupabase();
+    } else {
+        // Se offline, aggiorniamo manualmente la data dell'ultima visita nella RAM per i filtri
+        const idx = clientsList.findIndex(c => c.id === modalTargetId);
+        if (idx !== -1) {
+            clientsList[idx].lastVisit = date;
+            await saveToOfflineCache('clientsData', clientsList);
+        }
+        renderClients();
+        openAlert("Visita salvata in locale!");
+    }
+}
+
 // BB Modifiche Medici e Visite
 async function confirmEditClient() {
     const name = document.getElementById('modal-edit-name').value.trim();
@@ -1186,6 +1284,11 @@ async function askDeleteClient(clientId, clientName) {
         // Pulizia UI
         closeModal('modal-confirm');
         appState.clientsNeedsRefresh = true;
+        appState.calendarNeedsRefresh = true;
+
+        // Pulizia Forzata Della RAM Per Evitare Di Mostrare Dati Inconsistenti Fino Al Prossimo Caricamento Da DB
+        allVisits = allVisits.filter(v => v.medico_id !== clientId);
+        processVisitsForCalendar();
 
         // Ricarica Lista
         await loadAllDataFromSupabase();
@@ -1318,6 +1421,18 @@ function closeModal(id) {
     if (bsModal) bsModal.hide();
 }
 
+// Apre il modale per aggiungere una visita veloce dall'anagrafica
+function openAddVisitModal(clientId) {
+    modalTargetId = clientId;
+    const client = clientsList.find(c => c.id === clientId);
+    document.getElementById('modal-add-visit-desc').innerHTML = `Pianifica visita per <b>${client.name}</b>`;
+    document.getElementById('new-visit-date').value = dayjs().format('YYYY-MM-DD');
+    document.getElementById('new-visit-time').value = "09:00";
+    openModal('modal-add-visit');
+}
+
+
+
 /* 
 AA 10: UTILITY, FORM HELPERS E SICUREZZA
 */
@@ -1359,20 +1474,28 @@ function updateSpecDropdowns() {
         const el = document.getElementById(id);
         if (!el) return;
         const currentVal = el.value;
-        let html = id === 'filter-spec' ? '<option value="all">Tutte</option>' : '<option value="" disabled selected>Specializzazione</option>';
-        allSpecs.forEach(s => { html += `<option value="${s}">${s}</option>`; });
+        let html = id === 'filter-spec'
+            ? `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>Tutte</option>`
+            : `<option value="" disabled ${!currentVal ? 'selected' : ''}>Specializzazione</option>`;
+
+        allSpecs.forEach(s => {
+            // Aggiunta Attributo selected Nell'HTML
+            html += `<option value="${s}" ${s === currentVal ? 'selected' : ''}>${s}</option>`;
+        });
+
         if (id !== 'filter-spec') html += `<option value="NEW_SPEC"> + Aggiungi Specializzazione</option>`;
         el.innerHTML = html;
-        if (currentVal) el.value = currentVal;
     });
 }
 
 function updateCityFilter() {
     const select = document.getElementById('filter-city');
+    if (!select) return;
     const current = select.value;
     const cities = [...new Set(clientsList.map(c => c.city).filter(Boolean))].sort();
-    select.innerHTML = '<option value="all">Tutte</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
-    select.value = current;
+    // Aggiunta Attributo selected Nell'HTML
+    select.innerHTML = `<option value="all" ${current === 'all' ? 'selected' : ''}>Tutte</option>` +
+        cities.map(c => `<option value="${c}" ${c === current ? 'selected' : ''}>${c}</option>`).join('');
 }
 
 // BB Indicatore Stato Rete Nella Navbar

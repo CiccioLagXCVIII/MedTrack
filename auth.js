@@ -78,7 +78,7 @@ async function handleLogin(e) {
 
     } catch (error) {
         errorEl.innerText = "Accesso Negato. Controlla Credenziali.";
-        errorEl.style.display = "block";
+        errorEl.classList.remove('display-none');
         btn.disabled = false;
         btn.classList.remove('btn-loading-modern');
     }
