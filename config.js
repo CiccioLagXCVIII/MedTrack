@@ -1,0 +1,6 @@
+const CONFIG = {
+    SUPABASE_URL: 'MY_SUPABASE_URL',
+    SUPABASE_KEY: 'MY_SUPABASE_KEY'
+};
+
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
