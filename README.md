@@ -25,6 +25,17 @@ Il progetto risolve le sfide logistiche quotidiane di un **Informatore Scientifi
 
 ---
 
+## 🔐 Accesso e Utilizzo dell'App (Whitelist)
+Per garantire la massima sicurezza e la corretta compartimentazione dei dati nel database, **la registrazione libera all'applicazione è momentaneamente disabilitata**. Il sistema di login è gestito in un ambiente chiuso e protetto tramite Supabase Auth.
+
+Se sei un Informatore Scientifico, un collega o un utente interessato a utilizzare MedTrack per il tuo lavoro:
+👉 **Devi essere aggiunto manualmente alla Whitelist.**
+
+📧 **Come richiedere l'accesso:**
+Scrivimi un'email all'indirizzo **francescoloverde05@gmail.com** specificando che vorresti provare MedTrack. Provvederò personalmente a creare il tuo account sicuro e a inviarti le credenziali di accesso per iniziare a usare la piattaforma.
+
+---
+
 ## 🛠️ Architettura Tecnica
 *   **Frontend PWA:** HTML5, CSS3 (Variabili CSS, Flexbox/Grid), JavaScript Moderno (ES6+ Vanilla). Nessun framework pesante.
 *   **UI/UX:** Bootstrap 5 (solo griglia e utility), [Lucide Icons](https://lucide.dev/), Modali caricati dinamicamente via `fetch` per un DOM pulito.
@@ -56,6 +67,16 @@ Sistema di monitoraggio visivo guidato dal database (Vista SQL ottimizzata):
 Flusso di lavoro diviso in due modalità:
 *   **Scheduled:** Appuntamenti prefissati con orario esatto.
 *   **Liberi (Walk-in):** Coda intelligente che mostra *solo* i medici che ricevono senza appuntamento nel giorno corrente della settimana e che non sono ancora stati visitati oggi.
+
+### 5. Gestione Attività (Task System)
+*   To-Do List integrata per segnare chiamate, appuntamenti da prendere o attività burocratiche.
+*   Possibilità di collegare un Task a un medico specifico dall'anagrafica.
+*   Sistema di priorità visivo e filtraggio rapido (Da Fare, Completati, Relativi a Medici, Generici).
+
+### 6. Modalità Offline-First Intelligente
+*   L'app non si blocca se manca la connessione (es. dentro ospedali o ambulatori schermati).
+*   Le modifiche, le nuove visite e i task creati senza rete vengono salvati nella memoria del dispositivo.
+*   Un **LED indicatore** segnala lo stato della rete e sincronizza tutto automaticamente con il server Supabase non appena il telefono torna online.
 
 ---
 
@@ -97,7 +118,11 @@ agendaOverpoweredISF/
 ┣ script.js         # Core business logic
 ┣ sw.js             # Service Worker (Caching)
 ┣ offlineManager.js # Logica IndexedDB / Sync Queue
-┣ index.html        # SPA Main
+┣ pwaManager.js     # Gestione update PWA
+┣ manifest.json     # Manifest per installazione app
+┣ index.html        # SPA Main Dashboard
+┣ login.html        # Pagina di autenticazione
+┣ modals.html       # Finestre modali caricate dinamicamente
 ┣ style.css         # SaaS-style Design
 ┗ schema.sql        # Setup Database PostgreSQL
 ```
@@ -119,4 +144,4 @@ Il codice è condiviso esclusivamente per scopi di studio e consultazione.
 *   ❌ **Vietato:** Commercializzazione, rivendita del software "as-is" o utilizzo del brand "MedTrack / Agenda Overpowered" per fini di lucro.
 
 ---
-*Creato con ☕ e WSL da una necessità reale.*
+*Creato con tanto ☕ da una necessità reale.*
