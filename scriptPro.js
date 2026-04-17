@@ -284,6 +284,8 @@ async function loadMonthDataFromSupabase(targetDate) {
             renderCalendar();
             updateExistingClientsSelect();
             // Evitiamo Alert Multipli E Aggiorna In Silenzio Se Non Ho Dati In Cache
+            checkMorningReport(allVisits);
+            scheduleAllTodayVisits(allVisits);
         } else {
             openAlert("Nessuna Visita Salvata In Cache Per Il Mese Di " + monthYearString + ". Conntettiti A Internet Per Caricare I Dati.");
             renderCalendar(); // Rende Griglia Vuota
@@ -327,9 +329,12 @@ async function loadMonthDataFromSupabase(targetDate) {
         renderCalendar();
         updateExistingClientsSelect();
         updateSpecDropdowns();
+        checkMorningReport(allVisits);
+        scheduleAllTodayVisits(allVisits);
 
     } catch (error) {
         openAlert("Errore Caricamento Dati Per Il Mese Selezionato.");
+        console.error("Errore Caricamento Dati Per Il Mese Selezionato:", error);
     }
 }
 
@@ -813,7 +818,6 @@ async function addAppointment() {
             openAlert("Salvato In Locale. Sarà Sincronizzato Appena Torna Internet!");
             renderDayAppointments();
             resetForm();
-
         } else {
             // DD Online: Ricarichiamo Da Supabase Per Avere ID Reale E Relazioni
             await loadMonthDataFromSupabase(currentDate);
@@ -859,6 +863,9 @@ async function addAppointment() {
     // CC Imposto Flag Di Refresh
     appState.calendarNeedsRefresh = true;
     appState.clientsNeedsRefresh = true;
+
+    checkMorningReport(allVisits);
+    scheduleAllTodayVisits(allVisits);
 }
 
 async function confirmNewVisitFromAnagrafica() {
@@ -997,11 +1004,14 @@ function renderClients() {
     const container = document.getElementById('clients-container');
     if (!container) return;
 
-    // CC Acquisizione valori filtri
-    const searchTerm = document.getElementById('search-client').value.toLowerCase();
-    const filterSpec = document.getElementById('filter-spec').value;
-    const filterCity = document.getElementById('filter-city').value;
-    const filterVisit = document.querySelector('input[name="visitFilter"]:checked').value;
+    // CC Acquisizione Valori Filtri
+    const searchTerm = (document.getElementById('search-client')?.value || "").toLowerCase();
+    const filterSpec = document.getElementById('filter-spec')?.value || 'all';
+    const filterCity = document.getElementById('filter-city')?.value || 'all';
+
+    // DD Se Non Trova Il Radio Button Imposta Il Filtro Di Default "all" Per Evitare Errori
+    const filterVisitEl = document.querySelector('input[name="visitFilter"]:checked');
+    const filterVisit = filterVisitEl ? filterVisitEl.value : 'all';
 
     container.innerHTML = '';
     const today = dayjs().startOf('day');
@@ -1018,6 +1028,11 @@ function renderClients() {
 
         return matchesSearch && matchesSpec && matchesCity && matchesVisit;
     });
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p class="text-center py-5">Nessun Medico Trovato Con Questi Filtri</p>';
+        return;
+    }
 
     // CC Generazione Card
     filtered.forEach(client => {
@@ -1078,7 +1093,7 @@ function renderClients() {
         container.appendChild(card);
     });
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // BB Ricerca e Filtri

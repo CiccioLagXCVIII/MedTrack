@@ -108,6 +108,7 @@ async function checkSession() {
         }
         return null;
     }
+
     return session;
 }
 

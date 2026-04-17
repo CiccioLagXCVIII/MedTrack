@@ -1,0 +1,265 @@
+[id^="slot-"] {
+    animation: slideDown 0.2s ease-out;
+    border-left: 4px solid var(--primary) !important;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.time-from,
+.time-to {
+    max-width: 90px !important;
+    border: 1px solid #ddd !important;
+    padding: 2px 5px !important;
+    height: 30px !important;
+    font-size: 0.85rem !important;
+}
+
+.notify-float-btn {
+    border-radius: var(--radius-md) !important;
+    position: fixed;
+    left: 20px;
+    /* Speculare al right: 20px del logout */
+    width: 45px;
+    height: 45px;
+    background: var(--bg-white);
+    z-index: 1000;
+    border: 1px solid var(--border-color) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: calc(env(safe-area-inset-bottom, 20px) + 20px) !important;
+    transition: all 0.3s ease;
+}
+
+/* Colori specifici quando le notifiche sono attive */
+.notify-float-btn.active-notify {
+    color: var(--primary-dark) !important;
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light) !important;
+}
+
+/* Colori quando l'utente ha bloccato le notifiche */
+.notify-float-btn.denied-notify {
+    color: var(--danger) !important;
+    border-color: #fca5a5 !important;
+    background-color: #fef2f2 !important;
+}
+
+/* ==========================================================================
+   DASHBOARD BRIEFING - PREMIUM REDESIGN
+   ========================================================================== */
+
+.report-body {
+    background: linear-gradient(180deg, #fffafa 0%, #f8f9fc 100%) !important;
+    font-family: 'Inter', sans-serif;
+    color: #2d3748;
+}
+
+/* Header: Allineamento perfetto */
+.report-header {
+    padding-top: 10px;
+    margin-bottom: 25px;
+}
+
+.btn-back-circle {
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bf4f8a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-decoration: none !important;
+    border: 1px solid #fce4e8;
+}
+
+.report-title {
+    font-size: 1.5rem !important;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.2;
+    background: linear-gradient(45deg, #bf4f8a, #d4418e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.report-subtitle {
+    font-size: 0.85rem;
+    color: #718096;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.report-badge-today {
+    background: #fff5f7;
+    color: #bf4f8a;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border: 1px solid #ffc0cb;
+}
+
+/* Stats Card: Stile Widget */
+.report-stats-card .card {
+    background: #ffffff;
+    border-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 10px 25px -5px rgba(191, 79, 138, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.report-stats-card .card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: #bf4f8a;
+}
+
+.stats-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stats-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-top: 5px;
+}
+
+.stats-icon-bg {
+    width: 50px;
+    height: 50px;
+    background: #fff5f7;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats-icon-bg i {
+    width: 24px;
+    height: 24px;
+    stroke: #bf4f8a;
+}
+
+/* Sezione Timeline */
+.section-divider-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-divider-title::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+/* Card Visita: Migliorata */
+.visit-report-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.visit-time-badge {
+    background: #bf4f8a;
+    /* Colore pieno per risaltare */
+    padding: 10px 5px;
+    border-radius: 12px;
+    min-width: 60px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(191, 79, 138, 0.2);
+}
+
+.visit-time-badge .time-val {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.visit-info h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 3px;
+}
+
+.visit-info p {
+    font-size: 0.8rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Animazione di ingresso */
+.visit-report-card {
+    animation: slideUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Pulse per il badge LIVE */
+.pulse-animation {
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(191, 79, 138, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(191, 79, 138, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(191, 79, 138, 0);
+    }
+}

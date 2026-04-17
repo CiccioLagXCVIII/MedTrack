@@ -55,13 +55,33 @@ async function processSyncQueue() {
     const queue = await getSyncQueue();
     if (queue.length === 0) return;
 
-    console.log(`🚀 Sincronizzazione Di ${queue.length} Elementi...`);
+    // BB: Ordiniamo la coda per garantire che i Medici vengano creati prima delle Visite
+    // DD: 'medici' (INSERT) deve venire prima di 'visite' (INSERT)
+    // DD: Usiamo il timestamp per mantenere l'ordine cronologico delle altre operazioni
+    queue.sort((a, b) => {
+        const order = { 'medici': 1, 'tasks': 2, 'visite': 3 };
+        const orderA = order[a.table] || 4;
+        const orderB = order[b.table] || 4;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.timestamp - b.timestamp;
+    });
+
+    console.log(`🚀 Sincronizzazione Di ${queue.length} Elementi Ordinati...`);
+
     updateNetworkLED('syncing'); // Accende LED Blu
 
     // FONDAMENTALE: Diamo 1.5 secondi a Supabase per ripristinare il token Auth dopo il ritorno online
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     const db = await initIndexedDB();
+
+    // BB: Tracciamento operazioni sincronizzate per notifica finale
+    let counters = {
+        visiteScheduled: 0,
+        visiteWalkin: 0,
+        tasks: 0,
+        altri: 0
+    };
 
     for (const item of queue) {
         try {
@@ -98,6 +118,19 @@ async function processSyncQueue() {
                 req.onsuccess = () => res();
             });
 
+            // ✅ SUCCESSO: Incrementa il contatore specifico (inserisci questo subito dopo console.log)
+            if (item.table === 'visite') {
+                if (item.payload && item.payload.is_walkin_done === true) {
+                    counters.visiteWalkin++;
+                } else {
+                    counters.visiteScheduled++;
+                }
+            } else if (item.table === 'tasks') {
+                counters.tasks++;
+            } else {
+                counters.altri++;
+            }
+
             console.log(`✅ Sincronizzato ${op} Per ${item.table}`);
 
         } catch (err) {
@@ -108,6 +141,24 @@ async function processSyncQueue() {
     }
 
     console.log("✅ Sincronizzazione Completata Con Successo!");
+
+    // BB: Invio Notifica Di Avvenuta Sincronizzazione
+    const totalSynced = Object.values(counters).reduce((a, b) => a + b, 0);
+
+    if (totalSynced > 0) {
+        let msgParts = [];
+        if (counters.visiteScheduled > 0) msgParts.push(`${counters.visiteScheduled} Appuntamenti`);
+        if (counters.visiteWalkin > 0) msgParts.push(`${counters.visiteWalkin} Liberi`);
+        if (counters.tasks > 0) msgParts.push(`${counters.tasks} Task`);
+        if (counters.altri > 0) msgParts.push(`${counters.altri} Altro`);
+
+        const finalMsg = "Sincronizzati: " + msgParts.join(", ");
+
+        if (typeof NotificationManager !== 'undefined') {
+            NotificationManager.sendLocalNotification("MedTrack Aggiornato", finalMsg);
+        }
+    }
+
     updateNetworkLED('online'); // Torna LED Verde
 
     // Ricarichiamo i dati a schermo per allinearli al Server

@@ -3,10 +3,34 @@
 <html lang="it">
 
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+        <!-- <script>eruda.init();</script> -->
         <!-- AA 1: META TAGS ESSENZIALI -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>MedTrack | Professional ISF Agenda</title>
+        <!-- BB Tags Condivisione -->
+        <!-- Primary Meta Tags -->
+        <meta name="title" content="MedTrack | Agenda Professionale ISF">
+        <meta name="description"
+            content="Gestione Intelligente Delle Visite Mediche, Monitoraggio Frequenza E Pianificazione Itinerari Per Informatori Scientifici.">
+
+        <!-- Open Graph / Facebook / WhatsApp -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://medtrack-agenda.netlify.app/">
+        <meta property="og:title" content="MedTrack | Agenda Professionale ISF">
+        <meta property="og:description"
+            content="Ottimizza I Tuoi Spostamenti E Non Perdere Mai Una Visita. Il Compagno Digitale Per L'ISF Moderno.">
+        <!-- IMPORTANTE: Usa l'URL assoluto per l'immagine -->
+        <meta property="og:image" content="https://medtrack-agenda.netlify.app/icon/siteLogo.png">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://medtrack-agenda.netlify.app/">
+        <meta property="twitter:title" content="MedTrack | Professional ISF Agenda">
+        <meta property="twitter:description"
+            content="Pianificazione Visite E Gestione Medici In Un'unica Dashboard SaaS.">
+        <meta property="twitter:image" content="https://medtrack-agenda.netlify.app/icon/siteLogo.png">
 
         <!-- AA 2: CONFIGURAZIONE PWA E MOBILE (iOS & Android) -->
         <!-- BB 2.1: Colore Tema E Manifest -->
@@ -31,6 +55,7 @@
             rel="stylesheet">
         <!-- BB 3.3: Stile Custom -->
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="styleProFeatures.css">
 
         <!-- AA 4: LIBRERIE ESTERNE (JS) -->
         <!-- BB 4.1: Bootstrap JS -->
@@ -46,17 +71,22 @@
         <!-- CC 5.1: Configurazione, Auth e Core Logic -->
         <script src="config.js" defer></script>
         <script src="auth.js" defer></script>
+        <!-- 
+        <script src="script.js" defer></script>
+        <script src="scriptProFeature.js" defer></script>
+        -->
         <script src="scriptPro.js" defer></script>
         <!-- CC 5.2: Gestione Installazione PWA (Service Worker) -->
         <script src="pwaManager.js" defer></script>
         <!-- CC 5.3: Gestione Offline -->
+        <script src="notificationManager.js" defer></script>
         <script src="offlineManager.js" defer></script>
     </head>
 
     <body>
         <div id="main-app">
 
-            <!-- NAVBAR -->
+            <!-- AA NAVBAR -->
             <nav class="navbar navbar-expand bg-white shadow-sm sticky-top border-bottom py-2">
                 <div class="container px-3">
                     <a class="navbar-brand d-flex align-items-center gap-2" href="#"
@@ -90,7 +120,7 @@
 
             <div class="container-fluid py-3 flex-grow-1">
 
-                <!-- AA VISTA CALENDARIO -->
+                <!-- BB VISTA CALENDARIO -->
                 <div id="calendar-view" class="view active">
                     <!-- Header compatto -->
                     <div
@@ -110,7 +140,7 @@
                     <div id="calendar-grid" class="calendar-grid"></div>
                 </div>
 
-                <!-- AA VISTA GIORNO -->
+                <!-- BB VISTA GIORNO -->
                 <div id="day-view" class="view">
                     <button
                         class="btn btn-outline-secondary mb-3 d-flex align-items-center gap-2 rounded-pill px-3 shadow-sm"
@@ -258,14 +288,14 @@
                     </div>
                 </div>
 
-                <!-- AA VISTA ANAGRAFICA -->
+                <!-- BB VISTA ANAGRAFICA -->
                 <div id="clients-view" class="view">
                     <!-- SEARCH & FILTER BAR (Sticky su mobile) -->
                     <div class="sticky-top bg-light pt-2" style="z-index: 100;">
                         <div class="search-wrapper mb-2">
                             <div class="search-input-group shadow-sm">
                                 <i data-lucide="search" class="search-icon-inside"></i>
-                                <input type="text" id="search-client" class="form-control" placeholder="Cerca medico..."
+                                <input type="text" id="search-client" class="form-control" placeholder="Cerca Medico..."
                                     onkeyup="handleSearchInput()">
                                 <button type="button" id="clear-search-btn" class="btn-close clear-icon d-none"
                                     onclick="clearSearch()"></button>
@@ -330,7 +360,7 @@
                     <div id="clients-container" class="mt-2"></div>
                 </div>
 
-                <!-- AA VISTA TASKS -->
+                <!-- BB VISTA TASKS -->
                 <div id="tasks-view" class="view">
 
                     <!-- HEADER -->
@@ -375,6 +405,14 @@
                 </div>
             </div>
 
+            <!-- AA Tasto Notifiche (In Basso A Sinistra) -->
+            <button id="btn-toggle-notify"
+                class="btn btn-white text-secondary border shadow-sm fw-bold notify-float-btn"
+                onclick="toggleNotifications()">
+                <i data-lucide="bell"></i>
+            </button>
+
+            <!-- AA Tasto Logout (In Basso A Destra) -->
             <button class="btn btn-white text-danger border shadow-sm fw-bold logout-float-btn"
                 onclick="handleLogout()">
                 <i data-lucide="log-out"></i>
