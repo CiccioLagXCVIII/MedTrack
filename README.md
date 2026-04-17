@@ -5,143 +5,137 @@
 
 <div align="center">
 
-![Versione](https://img.shields.io/badge/Versione-1.6-blue)
-![Stato](https://img.shields.io/badge/Stato-Production--Ready-success)
-![PWA](https://img.shields.io/badge/PWA-Installable-purple)
-![Stack](https://img.shields.io/badge/Stack-Vanilla_JS--Supabase--PostgreSQL-orange)
+![Versione](https://img.shields.io/badge/Versione-1.6-blue?style=for-the-badge)
+![Stato](https://img.shields.io/badge/Stato-Production--Ready-success?style=for-the-badge)
+![PWA](https://img.shields.io/badge/PWA-Installable-purple?style=for-the-badge)
+![Stack](https://img.shields.io/badge/Stack-Vanilla_JS--Supabase--PostgreSQL-orange?style=for-the-badge)
 
 </div>
 
-**MedTrack (Agenda Overpowered)** è una soluzione digitale avanzata progettata specificamente per centralizzare la gestione dei medici, pianificare le visite e monitorare i target di contatto. Strutturata come una SPA (Single Page Application) e configurata come **PWA (Progressive Web App)**, offre l'esperienza fluida di un software SaaS professionale, ottimizzata per l'uso nativo su smartphone (iOS/Android) e supportata da un solido backend relazionale.
+---
+
+## 🚀 Visione del Progetto
+**MedTrack (Agenda Overpowered)** è una Single Page Application (SPA) avanzata, concepita come una **PWA (Progressive Web App)** professionale. Nasce per centralizzare la gestione dei medici, ottimizzare i percorsi logistici e monitorare i target di visita in tempo reale. L'interfaccia, ispirata ai moderni software SaaS, garantisce un'esperienza fluida su iOS e Android, supportata da un potente motore relazionale PostgreSQL.
+
+### I pilastri dell'app:
+*   **Pianificazione Strategica:** Calendario mensile dinamico e gestione giornaliera ottimizzata per tipologia di visita (appuntamenti fissi vs liberi).
+*   **Monitoraggio Intelligente (Color Coding):** Algoritmo proprietario che calcola i giorni trascorsi dall'ultimo contatto, fornendo alert visivi istantanei (Verde/Giallo/Rosso/Blu).
+*   **Logistica One-Click:** Integrazione con Google Maps e Waze per navigazione millimetrica, oltre a shortcut per chiamate e WhatsApp.
+*   **Privacy & Sicurezza:** Architettura multi-utente con compartimentazione dei dati tramite policy di sicurezza a livello di riga (RLS).
 
 ---
 
-## 🚀 Visione Generale
-Il progetto risolve le sfide logistiche quotidiane di un **Informatore Scientifico del Farmaco (ISF)** attraverso:
-*   **Pianificazione Intelligente:** Calendario dinamico mensile e viste giornaliere divise per tipologia di attività (su appuntamento o liberi/walk-in).
-*   **Monitoraggio Target (Color Coding):** Calcolo automatico dei giorni trascorsi dall'ultima visita con alert cromatici immediati (Verde/Giallo/Rosso/Blu).
-*   **Logistica One-Click:** Scelta rapida tra navigazione via Google Maps o Waze e pulsanti per chiamate/WhatsApp diretti.
-*   **Gestione Multi-Utente Sicura:** Sistema di login e compartimentazione dei dati. Nessun ISF può vedere i dati di un altro collega.
+## 🔐 Accesso e Whitelist
+Per garantire la massima sicurezza e la corretta separazione dei dati, **la registrazione libera è disabilitata**. L'accesso è limitato agli utenti autorizzati tramite Supabase Auth.
 
----
-
-## 🔐 Accesso e Utilizzo dell'App (Whitelist)
-Per garantire la massima sicurezza e la corretta compartimentazione dei dati nel database, **la registrazione libera all'applicazione è momentaneamente disabilitata**. Il sistema di login è gestito in un ambiente chiuso e protetto tramite Supabase Auth.
-
-Se sei un Informatore Scientifico, un collega o un utente interessato a utilizzare MedTrack per il tuo lavoro:
-👉 **Devi essere aggiunto manualmente alla Whitelist.**
-
-📧 **Come richiedere l'accesso:**
-Scrivimi un'email all'indirizzo **francescoloverde05@gmail.com** specificando che vorresti provare MedTrack. Provvederò personalmente a creare il tuo account sicuro e a inviarti le credenziali di accesso per iniziare a usare la piattaforma.
-
----
-
-## 🛠️ Architettura Tecnica
-*   **Frontend PWA:** HTML5, CSS3 (Variabili CSS, Flexbox/Grid), JavaScript Moderno (ES6+ Vanilla). Nessun framework pesante.
-*   **UI/UX:** Bootstrap 5 (solo griglia e utility), [Lucide Icons](https://lucide.dev/), Modali caricati dinamicamente via `fetch` per un DOM pulito.
-*   **Gestione Date:** [Day.js](https://day.js.org/) (Localizzazione IT) per calcoli temporali complessi.
-*   **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL). Utilizzo avanzato di **Viste SQL (Views)** per demandare il calcolo delle date al database, azzerando i lag sul client.
-*   **Sicurezza:** Autenticazione Supabase Auth e **Row Level Security (RLS)** su tabelle e viste.
-*   **Offline-First:** Service Worker (`sw.js`) per caching delle risorse e `IndexedDB` (`offlineManager.js`) per gestire le code di sincronizzazione (Outbox Pattern).
+### 📧 Come richiedere l'accesso:
+Se sei un Informatore Scientifico o un collega interessato a testare MedTrack:
+1. Invia un'email a: **francescoloverde05@gmail.com**
+2. Specifica la richiesta di accesso per MedTrack.
+3. Riceverai le credenziali sicure per il tuo account personale nella Whitelist.
 
 ---
 
 ## ✨ Funzionalità Core
 
-### 1. Sistema di Accesso Protette (Auth)
-Interfaccia di login dedicata con gestione sicura delle sessioni. Reindirizzamento automatico e blocco delle rotte non autorizzate tramite "Middleware" client-side.
+### 1. Dashboard & Calendario
+*   **Visualizzazione Mensile:** Griglia dinamica con badge numerici per il carico di lavoro giornaliero.
+*   **Smart Highlighting:** Identificazione immediata di "Oggi", weekend e festività.
 
-### 2. Dashboard Calendario
-*   Visualizzazione mensile con badge numerici dinamici per il carico di lavoro.
-*   **Smart Highlighting:** Giorno corrente evidenziato, festivi e prefestivi cromaticamente differenziati.
-
-### 3. Anagrafica Medici (Smart Card System)
-Sistema di monitoraggio visivo guidato dal database (Vista SQL ottimizzata):
+### 2. Anagrafica Medici (Smart Card System)
+Monitoraggio visivo basato su Viste SQL ottimizzate:
 *   🔵 **Nuovo Medico:** Mai visitato.
-*   🟢 **In Target:** Visitato da meno di 15 giorni.
+*   🟢 **In Target:** Visitato < 15 giorni fa.
 *   🟡 **Warning:** Visita necessaria (15-29 giorni).
-*   🔴 **Urgente:** Fuori target (>= 30 giorni).
-*   Filtri live per ricerca testuale, specializzazione, città e stato visita.
+*   🔴 **Urgente:** Fuori target (≥ 30 giorni).
+*   **Filtri Avanzati:** Ricerca istantanea per nome, città, specializzazione e stato visita.
 
-### 4. Gestione Giornaliera Dual-Tab
-Flusso di lavoro diviso in due modalità:
-*   **Scheduled:** Appuntamenti prefissati con orario esatto.
-*   **Liberi (Walk-in):** Coda intelligente che mostra *solo* i medici che ricevono senza appuntamento nel giorno corrente della settimana e che non sono ancora stati visitati oggi.
+### 3. Gestione Giornaliera (Dual-Tab Flow)
+*   **Tab Scheduled:** Lista cronologica degli appuntamenti fissati.
+*   **Tab Liberi (Walk-in):** Coda dinamica che mostra solo i medici che ricevono senza appuntamento nel giorno corrente e che non sono ancora stati visitati.
 
-### 5. Gestione Attività (Task System)
-*   To-Do List integrata per segnare chiamate, appuntamenti da prendere o attività burocratiche.
-*   Possibilità di collegare un Task a un medico specifico dall'anagrafica.
-*   Sistema di priorità visivo e filtraggio rapido (Da Fare, Completati, Relativi a Medici, Generici).
+### 4. Sistema Task & Promemoria
+*   To-Do List integrata per chiamate, burocrazia e scadenze.
+*   Possibilità di collegare direttamente ogni task a un medico in anagrafica.
+*   Filtri per priorità e contesto (Amministrativo vs Medico).
 
-### 6. Modalità Offline-First Intelligente
-*   L'app non si blocca se manca la connessione (es. dentro ospedali o ambulatori schermati).
-*   Le modifiche, le nuove visite e i task creati senza rete vengono salvati nella memoria del dispositivo.
-*   Un **LED indicatore** segnala lo stato della rete e sincronizza tutto automaticamente con il server Supabase non appena il telefono torna online.
+### 5. Architettura Offline-First
+*   **Resilienza:** L'app funziona perfettamente anche in zone d'ombra (ospedali, ambulatori interrati).
+*   **Sincronizzazione:** Le modifiche vengono salvate in `IndexedDB` e inviate a Supabase non appena torna il segnale.
+*   **Feedback:** Un LED di stato indica in tempo reale se sei Online, Offline o in fase di Sincronizzazione.
+
+---
+
+## 🛠️ Stack Tecnologico
+*   **Frontend:** HTML5, CSS3 (Variabili e Grid/Flex), JavaScript ES6+ Vanilla (zero framework pesanti).
+*   **UI/UX:** Bootstrap 5 (grid/utility), [Lucide Icons](https://lucide.dev/), Modali asincroni via `fetch`.
+*   **Date Manager:** [Day.js](https://day.js.org/) con localizzazione italiana.
+*   **Backend:** [Supabase](https://supabase.com/) (PostgreSQL) con uso intensivo di **Viste SQL** per performance elevate.
+*   **PWA Logic:** Service Worker (`sw.js`) per caching e `offlineManager.js` (Outbox Pattern).
 
 ---
 
 ## 🏗️ Setup e Installazione
 
-### 1. Configurazione Database (Supabase SQL Editor)
-La struttura completa del database è definita nel file [`schema.sql`](./schema.sql) presente nella root del progetto. 
+### 1. Database (Supabase)
+La struttura è contenuta nel file [`schema.sql`](./schema.sql).
+1. Copia il contenuto di `schema.sql` nell'SQL Editor di Supabase.
+2. **Importante:** Sostituisci `'IL_TUO_USER_ID_AUTH'` con il tuo UUID personale (sezione *Authentication > Users*) per abilitare la God Mode del developer.
+3. Esegui lo script.
 
-Per configurare il tuo ambiente su Supabase:
-1. Accedi alla tua Dashboard di [Supabase](https://supabase.com/).
-2. Vai nella sezione **SQL Editor** dal menu laterale.
-3. Copia l'intero contenuto del file `schema.sql` e incollalo nell'editor.
-4. **Importante:** Prima di eseguire, cerca nello script la riga relativa alla `God Mode` (Policy Developer) e sostituisci `'IL_TUO_USER_ID_AUTH'` con il tuo **UUID personale** (lo trovi in *Authentication > Users* nella tua dashboard).
-5. Clicca su **Run** per creare tabelle, relazioni, la Vista ottimizzata e le policy di sicurezza RLS.
+### 2. Frontend & API
+Crea un file `config.js` nella root del progetto:
+```javascript
+const CONFIG = {
+    SUPABASE_URL: 'https://tuo-progetto.supabase.co',
+    SUPABASE_KEY: 'tua-chiave-anon-key'
+};
+```
 
-### 2. Configurazione Frontend (Protezione API)
-Per connettere l'app al database:
-1. Crea un file chiamato `config.js` nella root del progetto.
-2. Inserisci le tue credenziali Supabase:
-   ```javascript
-   const CONFIG = {
-       SUPABASE_URL: 'https://tuo-progetto.supabase.co',
-       SUPABASE_KEY: 'tua-chiave-anon-key'
-   };
-   ```
-
-### 3. Avvio e Sviluppo
-*   **Server Locale:** Poiché l'app utilizza moduli ES, Service Worker e `fetch` dinamico, è necessario utilizzare un server locale. Se usi VS Code, l'estensione **Live Server** è la scelta raccomandata.
-*   **Offline Support:** Il Service Worker (`sw.js`) si occuperà di cacheare le risorse statiche. Per testare l'offline, usa il pannello "Network > Throttling > Offline" negli strumenti sviluppatore del browser.
+### 3. Sviluppo Locale
+Utilizza un server locale (es. **Live Server** di VS Code) per supportare i Moduli ES e il Service Worker. Per testare l'offline, usa i DevTools del browser (pannello Network).
 
 ---
 
-## 📂 Struttura Cartelle
+## 📂 Struttura del Progetto
 ```text
 agendaOverpoweredISF/
-┣ icon/             # Asset grafici e icone
-┣ config.js         # Credenziali API
-┣ auth.js           # Logica di autenticazione
-┣ script.js         # Core business logic
-┣ sw.js             # Service Worker (Caching)
-┣ offlineManager.js # Logica IndexedDB / Sync Queue
-┣ pwaManager.js     # Gestione update PWA
-┣ manifest.json     # Manifest per installazione app
-┣ index.html        # SPA Main Dashboard
-┣ login.html        # Pagina di autenticazione
-┣ modals.html       # Finestre modali caricate dinamicamente
-┣ style.css         # SaaS-style Design
-┗ schema.sql        # Setup Database PostgreSQL
+┣ 📂 .vscode/               # Configurazione Ambiente Di Sviluppo
+┣ 📂 icon/                  # Loghi E Icone
+┣ 📄 .gitignore             # Lista File Da Escludere Dal Caricamento Su Git
+┣ 🎨 style.css              # Foglio Di Stile Principale
+┣ 🎨 styleProFeatures.css   # Foglio Di Stile Per Features Aggiuntive
+┣ 📄 dayReport.html         # Pagina Per Il Report Giornaliero Automatico
+┣ 📄 index.html             # Dashboard Principale Applicazione
+┣ 📄 login.html             # Interfaccia Di Autenticazione
+┣ 📄 modals.html            # Modals Caricati Dinamicamente
+┣ 📜 auth.js                # Gestione Sessioni E Protezione Rotte
+┣ 📜 config.js              # Credenziali E Configurazione API Supabase
+┣ 📜 dayReportManager.js    # Logica Generazione Report Giornalieri
+┣ 📜 notificationManager.js # Logica Gestione Notifiche
+┣ 📜 offlineManager.js      # Logica IndexedDB E Sincronizzazione
+┣ 📜 pwaManager.js          # Gestione Gestione Installazione E Aggiornamenti PWA
+┣ 📜 scriptPro.js           # Logica Principale Dell'Applicazione
+┣ ⚙️ sw.js                  # Service Worker Per Caching E Uso Offline
+┣ 📱 manifest.json          # Configurazione Installazione Su Mobile
+┣ 📘 README.md              # Documentazione Progetto
+┣ ✅ toDo.md                # Tracciamento Cose Da Fare E Miglioramenti Futuri
+┗ 🗄️ schema.sql             # Query Per Setup Del Database Supabase (PostgreSQL)
 ```
 
 ---
 
 ## 💡 Nota dell'Autore
-Questo software è nato con un duplice obiettivo:
-1.  **Sfida Tecnica:** Architettare una SPA Full-Stack professionale, con architettura PWA e logiche database relazionali, utilizzando JavaScript puro senza affidarsi a framework massicci come React.
-2.  **Supporto Personale:** Risolvere concretamente i problemi logistici e di pianificazione della mia migliore amica, automatizzando la sua complessa attività di ISF.
-
-Sebbene l'interfaccia sia di stampo commerciale, l'app rimane un progetto didattico creato con dedizione e scopo sociale.
+Questo software è nato da una doppia motivazione:
+1.  **Sfida Tecnica:** Dimostrare che è possibile creare una SPA Full-Stack professionale e resiliente (offline-ready) usando JavaScript puro.
+2.  **Supporto Reale:** Automatizzare e semplificare la complessa attività di pianificazione della mia migliore amica nel suo lavoro quotidiano di ISF.
 
 ---
 
-## 📜 Licenza e Termini d'Uso
-Il codice è condiviso esclusivamente per scopi di studio e consultazione.
-*   ✅ **Consentito:** Uso personale non commerciale, analisi del codice, fork per scopi didattici.
-*   ❌ **Vietato:** Commercializzazione, rivendita del software "as-is" o utilizzo del brand "MedTrack / Agenda Overpowered" per fini di lucro.
+## 📜 Licenza e Termini
+Il codice è condiviso per scopi di **studio e consultazione**.
+*   ✅ **Sì:** Studio del codice, fork didattici, uso personale non commerciale.
+*   ❌ **No:** Rivendita, commercializzazione o uso del brand "MedTrack" per scopi di lucro.
 
 ---
-*Creato con tanto ☕ da una necessità reale.*
+*Realizzato con tanto ☕ per rispondere a necessità lavorative concrete.*
