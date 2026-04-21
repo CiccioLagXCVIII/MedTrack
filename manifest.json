@@ -1,6 +1,6 @@
 {
-    "name": "MedTrack Professional Agenda",
-    "short_name": "MedTrack",
+    "name": "ISFplan Professional Agenda",
+    "short_name": "ISFplan",
     "start_url": "/index.html",
     "display": "standalone",
     "background_color": "#ffffff",

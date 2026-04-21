@@ -1,74 +1,74 @@
-<!-- modals.html (Versione Pulita) -->
-
-<!-- MODALE: ORARIO WALK-IN -->
+<!-- AA Orario Walk In -->
 <div class="modal fade" id="modal-time" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content">
             <div class="modal-body p-4 text-center">
-                <h3 id="modal-time-title" class="fw-bold mb-2 text-dark">Orario</h3>
+                <h3 id="modal-time-title"
+                    class="fw-bold mb-2 text-primary d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="check-circle"></i> Conferma Visita
+                </h3>
                 <p id="modal-time-desc" class="text-secondary mb-3 small"></p>
-                <!-- Aggiunta classe input-time-lg per lo stile del font grande -->
-                <input type="time" id="modal-time-input"
-                    class="form-control form-control-lg mb-4 text-center input-time-lg">
+                <input type="time" id="modal-time-input" class="form-control form-control-lg mb-4 text-center">
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-time')">Annulla</button>
                     <button type="button" onclick="confirmTimeModal()"
-                        class="btn btn-success flex-fill fw-bold">Conferma</button>
+                        class="btn btn-success rounded-pill flex-fill fw-bold shadow-sm">Conferma</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: CONFERMA ELIMINAZIONE -->
+<!-- AA Conferma Eliminazione -->
 <div class="modal fade" id="modal-confirm" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content">
             <div class="modal-body p-4 text-center">
-                <!-- Rimosso stile inline dall'icona, aggiunta classe icon-lg -->
-                <h3 class="text-danger fw-bold mb-2 d-flex align-items-center justify-content-center gap-2">
-                    <i data-lucide="alert-triangle" class="icon-lg"></i> Conferma Azione
+                <h3 id="modal-confirm-title"
+                    class="text-danger fw-bold mb-2 d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="alert-triangle"></i> Elimina Elemento
                 </h3>
                 <p id="modal-confirm-desc" class="text-secondary mb-4"></p>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-confirm')">Annulla</button>
                     <button type="button" id="btn-execute-confirm"
-                        class="btn btn-danger flex-fill fw-bold">Elimina</button>
+                        class="btn btn-danger rounded-pill flex-fill fw-bold shadow-sm">Elimina</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: MODIFICA MEDICO -->
+<!-- AA Modifica Medico -->
 <div class="modal fade" id="modal-edit-client" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h4 class="modal-title fw-bold">Modifica Medico</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h4 class="modal-title fw-bold d-flex align-items-center gap-2"><i data-lucide="user-cog"
+                        class="text-primary"></i> Modifica Medico</h4>
+                <button type="button" class="btn-close" onclick="closeModal('modal-edit-client')"></button>
             </div>
             <div class="modal-body p-4 text-start">
                 <div class="mb-3">
-                    <label class="form-label label-custom-sm">Nome:</label>
+                    <label class="label-custom-sm">Nome:</label>
                     <input type="text" id="modal-edit-name" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label label-custom-sm">Città:</label>
+                    <label class="label-custom-sm">Città:</label>
                     <input type="text" id="modal-edit-city" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label label-custom-sm">Cellulare:</label>
+                    <label class="label-custom-sm">Cellulare:</label>
                     <input type="tel" id="modal-edit-phone" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label label-custom-sm">Specializzazione:</label>
+                    <label class="label-custom-sm">Specializzazione:</label>
                     <select id="modal-edit-spec" class="form-select"></select>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label label-custom-sm">Giorni Di Ricevimento (Liberi):</label>
+                    <label class="label-custom-sm">Giorni Ricevimento:</label>
                     <div class="d-flex flex-wrap gap-2" id="modal-edit-days-checkboxes">
                         <input type="checkbox" class="btn-check" id="edit-day-1" value="1">
                         <label class="btn btn-outline-primary btn-sm flex-fill fw-bold" for="edit-day-1">Lun</label>
@@ -87,144 +87,155 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-edit-client')">Annulla</button>
                     <button type="button" onclick="confirmEditClient()"
-                        class="btn btn-primary flex-fill fw-bold">Salva</button>
+                        class="btn btn-primary rounded-pill flex-fill fw-bold shadow-sm">Salva</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: ALERT ATTENZIONE -->
+<!-- AA Alert Attenzione -->
 <div class="modal fade" id="modal-alert" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content">
             <div class="modal-body p-4 text-center">
-                <h3 class="text-warning fw-bold mb-2">Attenzione</h3>
+                <div class="text-warning mb-3"><i data-lucide="info" class="icon-lg"></i></div>
+                <h3 class="fw-bold mb-2">Attenzione</h3>
                 <p id="modal-alert-desc" class="text-secondary mb-4"></p>
-                <button type="button" class="btn btn-primary w-100 fw-bold" data-bs-dismiss="modal">OK</button>
+                <button type="button" class="btn btn-primary rounded-pill w-100 fw-bold shadow-sm"
+                    onclick="closeModal('modal-alert')">OK</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: NOTE -->
+<!-- AA Note Visita -->
 <div class="modal fade" id="modal-note" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h4 class="modal-title fw-bold">Note Visita</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h4 class="modal-title fw-bold d-flex align-items-center gap-2"><i data-lucide="file-text"
+                        class="text-primary"></i> Note Visita</h4>
+                <button type="button" class="btn-close" onclick="closeModal('modal-note')"></button>
             </div>
             <div class="modal-body p-4">
                 <textarea id="modal-note-input" rows="4" class="form-control mb-4"
-                    placeholder="Scrivi Una Nota..."></textarea>
+                    placeholder="Scrivi una nota..."></textarea>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
-                    <button type="button" id="btn-save-note" class="btn btn-success flex-fill fw-bold">Salva
-                        Nota</button>
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-note')">Annulla</button>
+                    <button type="button" id="btn-save-note"
+                        class="btn btn-success rounded-pill flex-fill fw-bold shadow-sm">Salva Nota</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: SPOSTA APPUNTAMENTO -->
+<!-- AA Sposta Appuntamento -->
 <div class="modal fade" id="modal-edit-visit" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h4 class="modal-title fw-bold">Sposta Appuntamento</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h4 class="modal-title fw-bold d-flex align-items-center gap-2"><i data-lucide="calendar-range"
+                        class="text-primary"></i> Sposta Appuntamento</h4>
+                <button type="button" class="btn-close" onclick="closeModal('modal-edit-visit')"></button>
             </div>
             <div class="modal-body p-4 text-start">
                 <p id="modal-edit-visit-desc" class="text-secondary small mb-3"></p>
-                <div class="mb-3">
-                    <label class="form-label label-custom-sm">Nuova Data:</label>
-                    <input type="date" id="edit-visit-date" class="form-control">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="label-custom-sm">Nuova Data:</label>
+                        <input type="date" id="edit-visit-date" class="form-control">
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="label-custom-sm">Nuovo Orario:</label>
+                        <input type="time" id="edit-visit-time" class="form-control">
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label class="form-label label-custom-sm">Nuovo Orario:</label>
-                    <input type="time" id="edit-visit-time" class="form-control">
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-edit-visit')">Annulla</button>
                     <button type="button" onclick="confirmEditVisit()"
-                        class="btn btn-primary flex-fill fw-bold">Salva</button>
+                        class="btn btn-primary rounded-pill flex-fill fw-bold shadow-sm">Salva Modifiche</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: NUOVA VISITA DA ANAGRAFICA -->
+<!-- AA Nuova Visita Da Anagrafica -->
 <div class="modal fade" id="modal-add-visit" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h4 class="modal-title fw-bold">Aggiungi Appuntamento</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h4 class="modal-title fw-bold d-flex align-items-center gap-2"><i data-lucide="plus-circle"
+                        class="text-success"></i> Nuova Visita</h4>
+                <button type="button" class="btn-close" onclick="closeModal('modal-add-visit')"></button>
             </div>
             <div class="modal-body p-4 text-start">
                 <p id="modal-add-visit-desc" class="text-secondary small mb-3"></p>
                 <div class="mb-3">
-                    <label class="form-label label-custom-sm">Data Visita:</label>
+                    <label class="label-custom-sm">Data Visita:</label>
                     <input type="date" id="new-visit-date" class="form-control">
                 </div>
                 <div class="mb-4">
-                    <label class="form-label label-custom-sm">Orario:</label>
-                    <input type="time" id="new-visit-time" value="09:00" class="form-control">
+                    <label class="label-custom-sm">Orario:</label>
+                    <input type="time" id="new-visit-time" class="form-control">
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-light flex-fill fw-semibold"
-                        data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-light rounded-pill flex-fill fw-semibold"
+                        onclick="closeModal('modal-add-visit')">Annulla</button>
                     <button type="button" onclick="confirmNewVisitFromAnagrafica()"
-                        class="btn btn-success flex-fill fw-bold">Conferma</button>
+                        class="btn btn-success rounded-pill flex-fill fw-bold shadow-sm">Conferma</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: SCELTA NAVIGATORE -->
+<!-- AA Scelta Navigatore -->
 <div class="modal fade" id="modal-nav" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-content">
             <div class="modal-body p-4 text-center">
-                <h5 class="fw-bold mb-4">Scegli Navigatore</h5>
+                <h5 class="fw-bold mb-4 d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="navigation"></i> Naviga Verso
+                </h5>
                 <div class="d-flex flex-column gap-3">
                     <a id="btn-nav-google" href="#" target="_blank"
-                        class="btn btn-outline-primary py-3 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                        class="btn btn-outline-primary py-2 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2">
                         <i data-lucide="map"></i> Google Maps
                     </a>
                     <a id="btn-nav-waze" href="#" target="_blank"
-                        class="btn btn-outline-warning py-3 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 text-dark">
+                        class="btn btn-outline-warning py-2 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 text-dark">
                         <i data-lucide="navigation"></i> Waze
                     </a>
-                    <button type="button" class="btn btn-light py-2 mt-2 fw-semibold text-secondary"
-                        data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-light rounded-pill py-2 mt-2 fw-semibold text-secondary"
+                        onclick="closeModal('modal-nav')">Annulla</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE: TASK (Creazione e Modifica) -->
+<!-- AA Creazione E Modifica Task -->
 <div class="modal fade" id="modal-add-task" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow rounded-4">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="task-modal-title">Nuova Attività</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="task-modal-title">
+                    <i data-lucide="check-square" class="text-primary"></i> Nuova Attività
+                </h5>
+                <button type="button" class="btn-close" onclick="closeModal('modal-add-task')"></button>
             </div>
             <div class="modal-body p-4">
                 <input type="hidden" id="task-id-hidden">
 
-                <!-- Selettore Tipo Task (Segmented Control) -->
+                <!-- Selettore Tipo Task -->
                 <div class="segmented-control theme-indigo mb-4" id="task-type-selector">
                     <input type="radio" name="taskType" id="type-call" value="call" onchange="toggleTaskType()"
                         class="d-none">
@@ -242,36 +253,48 @@
                         Generica</label>
                 </div>
 
-                <!-- GRUPPO: Titolo e Note (Solo per Generica) -->
                 <div id="task-group-generic" class="mb-3">
-                    <label class="small text-muted mb-1 fw-bold">Titolo Task</label>
-                    <input type="text" id="task-titolo" class="form-control mb-3" placeholder="Titolo Task...">
+                    <label class="label-custom-sm">Titolo Attività</label>
+                    <input type="text" id="task-titolo" class="form-control mb-3"
+                        placeholder="Esempio: Inviare report...">
 
-                    <label class="small text-muted mb-1 fw-bold">Note (Opzionale)</label>
+                    <label class="label-custom-sm">Note (Opzionale)</label>
                     <textarea id="task-note" class="form-control" rows="2"
-                        placeholder="Dettagli Aggiuntivi..."></textarea>
+                        placeholder="Dettagli aggiuntivi..."></textarea>
                 </div>
 
-                <!-- GRUPPO: Selettore Medico (Per tutti, ma obbligatorio per Chiamata/Incontro) -->
                 <div id="task-group-medico" class="mb-3">
-                    <label class="small text-muted mb-1 fw-bold" id="label-medico-task">Collega A Medico</label>
-                    <select id="task-medico-link" class="form-select">
-                        <option value="">Nessun Medico Collegato</option>
-                    </select>
+                    <label class="label-custom-sm" id="label-medico-task">Collega A Medico</label>
+                    <select id="task-medico-link" class="form-select"></select>
                 </div>
 
-                <!-- Priorità (Sempre Visibile) -->
-                <label class="small text-muted mb-1 fw-bold">Priorità</label>
-                <select id="task-priorita" class="form-select mb-2">
-                    <option value="1">Bassa</option>
-                    <option value="2">Media</option>
-                    <option value="3">Alta</option>
+                <label class="label-custom-sm">Priorità</label>
+                <select id="task-priorita" class="form-select">
+                    <option value="1">Bassa (Grigio)</option>
+                    <option value="2">Media (Giallo)</option>
+                    <option value="3">Alta (Rosso)</option>
                 </select>
-
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annulla</button>
-                <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="saveTask()">Salva Attività</button>
+                <button class="btn btn-light rounded-pill px-4 fw-semibold"
+                    onclick="closeModal('modal-add-task')">Annulla</button>
+                <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="saveTask()">Salva
+                    Attività</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AA Vai A Data -->
+<div class="modal fade" id="modal-jump-date" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body p-4 text-center">
+                <div class="text-primary mb-3"><i data-lucide="calendar-search" class="icon-lg"></i></div>
+                <h6 class="fw-bold mb-3">Vai Ad Una Data Specifica</h6>
+                <input type="date" id="jump-to-date-input" class="form-control mb-3 text-center">
+                <button class="btn btn-primary rounded-pill w-100 fw-bold shadow-sm" onclick="jumpToDate()">Vai al
+                    Giorno</button>
             </div>
         </div>
     </div>

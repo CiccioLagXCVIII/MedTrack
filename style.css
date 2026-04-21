@@ -1,6 +1,7 @@
-/*
-   AA SEZIONE 1: CONFIGURAZIONE, VARIABILI E FONT
- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+
+/* AA SEZIONE 1: CONFIGURAZIONE, VARIABILI E FONT */
 
 /* BB Root Variables */
 :root {
@@ -31,13 +32,7 @@
     --safe-area-top: env(safe-area-inset-top, 0px);
 }
 
-/* BB Imports */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-
-/*
-   AA SEZIONE 2: STILI BASE E LAYOUT GLOBALE
- */
+/* AA SEZIONE 2: STILI BASE E LAYOUT GLOBALE */
 
 /* BB Reset e Body */
 body {
@@ -94,9 +89,7 @@ textarea {
 }
 
 
-/*
-   AA SEZIONE 3: COMPONENTI INTERFACCIA (UI) E FORM
- */
+/* AA SEZIONE 3: COMPONENTI INTERFACCIA (UI) E FORM */
 
 /* BB Bottoni Universali */
 /* CC Bottoni Primari */
@@ -271,64 +264,12 @@ input[type="time"]:valid {
     color: var(--text-main);
 }
 
-
-/*
-   AA SEZIONE 4: NAVBAR E NAVIGAZIONE
- */
-
-/* BB Barra di Navigazione */
-.navbar {
-    background: #ffffff !important;
-    border-bottom: 2px solid var(--primary) !important;
-    padding-top: calc(var(--safe-area-top) + 0.5rem) !important;
+[id^="slot-"] {
+    animation: slideDown 0.2s ease-out;
+    border-left: 4px solid var(--primary) !important;
 }
 
-.logo-nav {
-    width: 50px;
-    height: 50px;
-}
-
-.navbar-brand span {
-    color: var(--brand-color) !important;
-    letter-spacing: -0.5px;
-    background: linear-gradient(45deg, var(--brand-color), #d4418e);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* BB Eccezione Per LED Per Fare In Modo Che DIventi Trasparente A Causa Del Gradient */
-.navbar-brand span#network-led {
-    background-clip: border-box !important;
-    -webkit-background-clip: border-box !important;
-    -webkit-text-fill-color: initial !important;
-}
-
-/* BB Bottoni Navigazione */
-.nav-btn-custom {
-    border: none !important;
-    padding: 8px 20px !important;
-    border-radius: var(--radius-pill) !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
-    color: var(--secondary) !important;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    background: transparent;
-}
-
-.nav-btn-custom.active {
-    background: var(--primary) !important;
-    color: #4a5568 !important;
-    box-shadow: var(--shadow-sm) !important;
-}
-
-
-/*
-   AA SEZIONE 5: VISTA CALENDARIO
- */
+/* AA SEZIONE 4: VISTA CALENDARIO */
 
 /* BB Struttura Calendario */
 #calendar-view.active {
@@ -470,9 +411,7 @@ input[type="time"]:valid {
 }
 
 
-/*
-   AA SEZIONE 6: VISTA GIORNO E APPUNTAMENTI
- */
+/* AA SEZIONE 5: VISTA GIORNO E APPUNTAMENTI */
 
 /* BB Struttura Day View */
 #day-view {
@@ -514,7 +453,7 @@ input[type="time"]:valid {
     border-radius: 18px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease;
 }
 
@@ -640,9 +579,7 @@ input[type="time"]:valid {
 }
 
 
-/*
-   AA SEZIONE 7: ANAGRAFICA MEDICI (CLIENTS VIEW)
- */
+/* AA SEZIONE 6: ANAGRAFICA MEDICI (CLIENTS VIEW) */
 
 /* BB Struttura Anagrafica */
 #clients-view {
@@ -891,9 +828,131 @@ input[type="time"]:valid {
     width: 16px;
 }
 
-/*
-   AA SEZIONE 8: SISTEMA DI AUTENTICAZIONE (LOGIN)
- */
+/* AA SEZIONE 7: VISTA IMPOSTAZIONI */
+
+.settings-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 5px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-left: 8px;
+    /* Piccoli margini per non toccare i bordi dello schermo */
+    margin-right: 8px;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 15px;
+}
+
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
+    flex-shrink: 1;
+}
+
+/* Gestione testo lungo nelle etichette */
+.settings-label span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-value {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Ottimizzazione Select */
+.settings-value .form-select-sm {
+    width: auto !important;
+    min-width: 85px;
+    padding-left: 10px !important;
+    padding-right: 30px !important;
+    background-position: right 8px center !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 8px !important;
+    background-color: #f8fafc !important;
+    font-weight: 700;
+    color: #334155;
+    text-align: left;
+}
+
+.settings-value .btn-light {
+    background-color: #f8fafc !important;
+    border: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+    font-size: 0.8rem !important;
+    padding: 6px 16px !important;
+    font-weight: 700 !important;
+    border-radius: 50px !important;
+}
+
+.settings-value .btn-light:active {
+    background-color: #e2e8f0 !important;
+    transform: scale(0.95);
+}
+
+.settings-value [data-lucide="chevron-right"] {
+    width: 18px;
+    height: 18px;
+    color: #cbd5e1;
+}
+
+.settings-value .text-muted {
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+/* BB Button Notifiche (Il cerchio) */
+#btn-toggle-notify {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    /* Leggermente più piccolo per mobile */
+    height: 40px;
+    padding: 0;
+    border-radius: 50% !important;
+    flex-shrink: 0;
+}
+
+/* BB Button Logout */
+.btn-logout-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: #fff1f2 !important;
+    color: #e11d48 !important;
+    border: 1px solid #fecdd3 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 20px;
+    margin-bottom: 40px;
+    /* Più spazio dal fondo */
+    box-shadow: 0 2px 4px rgba(225, 29, 72, 0.05);
+}
+
+/* AA SEZIONE 8: SISTEMA DI AUTENTICAZIONE (LOGIN) */
 
 /* BB Layout Login */
 .login-body {
@@ -960,6 +1019,13 @@ input[type="time"]:valid {
     box-shadow: 0 0 0 4px var(--primary-light) !important;
 }
 
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(191, 79, 138, 0.1) !important;
+    border-color: #bf4f8a !important;
+    outline: none;
+}
+
 .login-input-group .input-group-text,
 .login-input-group .form-control,
 .login-input-group #toggle-password {
@@ -1013,9 +1079,7 @@ input[type="time"]:valid {
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25) !important;
 }
 
-/*
-   AA SEZIONE 9: VISTA TASK (TO-DO LIST)
- */
+/* AA SEZIONE 9: VISTA TASK */
 
 #tasks-container {
     display: flex;
@@ -1031,7 +1095,6 @@ input[type="time"]:valid {
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     border-left: 4px solid #cbd5e1;
-    /* Colore base priorità */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -1040,6 +1103,10 @@ input[type="time"]:valid {
 .task-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md) !important;
+}
+
+#task-priorita {
+    background-image: none;
 }
 
 /* CC Colori Priorità (Bordo sinistro) */
@@ -1195,9 +1262,139 @@ input[type="time"]:valid {
     color: var(--text-main);
 }
 
-/*
-   AA SEZIONE 10: UTILITY
- */
+/* AA SEZIONE 10: LED STATO DI RETE */
+
+.status-led {
+    min-width: 12px;
+    min-height: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+    transition: background-color 0.3s ease;
+    background-color: #cbd5e1;
+    /* Colore grigio di base se fallisce la connessione */
+}
+
+
+/* Stato Online: Verde Solido */
+#network-led.status-led.online {
+    background-color: #22c55e !important;
+    background: #22c55e !important;
+    -webkit-text-fill-color: #22c55e !important;
+    opacity: 1 !important;
+}
+
+/* Stato Offline: Rosso Solido Pulsante */
+#network-led.status-led.offline {
+    background-color: #ef4444 !important;
+    background: #ef4444 !important;
+    -webkit-text-fill-color: #ef4444 !important;
+    opacity: 1 !important;
+}
+
+/* Stato Syncing: Blu Solido Lampeggiante Veloce */
+#network-led.status-led.syncing {
+    background-color: #3b82f6 !important;
+    background: #3b82f6 !important;
+    -webkit-text-fill-color: #3b82f6 !important;
+    animation: pulse-opacity 0.6s infinite alternate;
+}
+
+/* Animazione */
+@keyframes pulse-opacity {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+/* AA SEZIONE 11: STATI DI CARICAMENTO (SKELETON & BUTTONS) */
+
+/* BB: Skeleton Loading per i contenuti (Card, Task, ecc) */
+.skeleton-box {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    border-radius: var(--radius-md);
+    color: transparent !important;
+    border: none !important;
+    pointer-events: none;
+    min-height: 20px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Varianti specifiche per lo skeleton */
+.skeleton-card {
+    height: 220px;
+    width: 100%;
+    border-radius: 24px;
+}
+
+.skeleton-task {
+    height: 80px;
+    width: 100%;
+    border-radius: 12px;
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    width: 80%;
+}
+
+.skeleton-title {
+    height: 24px;
+    margin-bottom: 12px;
+    width: 50%;
+}
+
+/* BB: Pulsante Login Moderno (Sostituisce lo spinner) */
+.btn-loading-modern {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading-modern::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin-smooth 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin-smooth {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* AA SEZIONE 12: UTILITY */
 
 /* BB Classi Utility */
 .display-none {
@@ -1226,21 +1423,6 @@ input[type="time"]:valid {
     }
 }
 
-.logout-float-btn {
-    border-radius: var(--radius-md) !important;
-    position: fixed;
-    right: 20px;
-    width: 45px;
-    height: 45px;
-    background: var(--bg-white);
-    z-index: 1000;
-    border: 1px solid var(--border-color) !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    bottom: calc(env(safe-area-inset-bottom, 20px) + 20px) !important;
-}
-
 /* BB Dimensioni Icone */
 .icon-sm {
     width: 16px;
@@ -1257,9 +1439,7 @@ input[type="time"]:valid {
     height: 24px;
 }
 
-/*
-   AA SEZIONE 10: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP)
- */
+/* AA SEZIONE 13: MEDIA QUERIES E RESPONSIVE DESIGN (BREAKPOINTS BOOTSTRAP) */
 
 /* CC SM: Schermi piccoli (Smartphone >= 576px) */
 @media (min-width: 576px) {
@@ -1355,139 +1535,3 @@ input[type="time"]:valid {
 }
 
 /* CC MD DOWN: Tablet e Mobile (<= 991.98px) */
-
-/*
-   AA 11: LED STATO DI RETE (ONLINE / OFFLINE / SYNC)
- */
-
-.status-led {
-    min-width: 12px;
-    min-height: 12px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 6px;
-    transition: background-color 0.3s ease;
-    background-color: #cbd5e1;
-    /* Colore grigio di base se fallisce la connessione */
-}
-
-
-/* Stato Online: Verde Solido */
-#network-led.status-led.online {
-    background-color: #22c55e !important;
-    background: #22c55e !important;
-    -webkit-text-fill-color: #22c55e !important;
-    opacity: 1 !important;
-}
-
-/* Stato Offline: Rosso Solido Pulsante */
-#network-led.status-led.offline {
-    background-color: #ef4444 !important;
-    background: #ef4444 !important;
-    -webkit-text-fill-color: #ef4444 !important;
-    opacity: 1 !important;
-}
-
-/* Stato Syncing: Blu Solido Lampeggiante Veloce */
-#network-led.status-led.syncing {
-    background-color: #3b82f6 !important;
-    background: #3b82f6 !important;
-    -webkit-text-fill-color: #3b82f6 !important;
-    animation: pulse-opacity 0.6s infinite alternate;
-}
-
-/* Animazione */
-@keyframes pulse-opacity {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.3;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-
-/*
-   AA 12: STATI DI CARICAMENTO (SKELETON & BUTTONS)
- */
-
-/* BB: Skeleton Loading per i contenuti (Card, Task, ecc) */
-.skeleton-box {
-    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-    background-size: 400% 100%;
-    animation: skeleton-loading 1.5s infinite ease-in-out;
-    border-radius: var(--radius-md);
-    color: transparent !important;
-    border: none !important;
-    pointer-events: none;
-    min-height: 20px;
-}
-
-@keyframes skeleton-loading {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Varianti specifiche per lo skeleton */
-.skeleton-card {
-    height: 220px;
-    width: 100%;
-    border-radius: 24px;
-}
-
-.skeleton-task {
-    height: 80px;
-    width: 100%;
-    border-radius: 12px;
-}
-
-.skeleton-text {
-    height: 16px;
-    margin-bottom: 8px;
-    width: 80%;
-}
-
-.skeleton-title {
-    height: 24px;
-    margin-bottom: 12px;
-    width: 50%;
-}
-
-/* BB: Pulsante Login Moderno (Sostituisce lo spinner) */
-.btn-loading-modern {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
-}
-
-.btn-loading-modern::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin-smooth 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-@keyframes spin-smooth {
-    to {
-        transform: translate(-50%, -50%) rotate(360deg);
-    }
-}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medtrack-v1.6';
+const CACHE_NAME = 'ISFplan-v1.6.2';
 
 const ASSETS_TO_CACHE = [
     './',
@@ -14,7 +14,8 @@ const ASSETS_TO_CACHE = [
     './notificationManager.js',
     './offlineManager.js',
     './pwaManager.js',
-    './scriptPro.js',
+    './script.js',
+    './scriptProFeatures.js',
     './manifest.json',
     './icon/siteIcon.png',
     './icon/siteLogo.png',
@@ -85,7 +86,7 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('push', (event) => {
     // 1. Definiamo i default
-    let title = "MedTrack";
+    let title = "ISFplan";
     let body = "Hai una nuova notifica";
 
     // 2. Cerchiamo di parsare il contenuto

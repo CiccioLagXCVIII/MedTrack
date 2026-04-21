@@ -1,6 +1,4 @@
-/* ==========================================================================
-   AA 1: UTILITY E INIZIALIZZAZIONE INTERFACCIA (UI)
-   ========================================================================== */
+// AA 1: UTILITY E INIZIALIZZAZIONE INTERFACCIA (UI)
 
 // BB: Gestione Icone (Libreria Lucide)
 function refreshIcons() {
@@ -41,9 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/* ==========================================================================
-   AA 2: LOGICA DI AUTENTICAZIONE (SUPABASE AUTH)
-   ========================================================================== */
+// AA 2: LOGICA DI AUTENTICAZIONE (SUPABASE AUTH)
 
 // BB: Funzioni Core di Accesso
 // CC: Gestore del Login (handleLogin)
@@ -113,9 +109,7 @@ async function checkSession() {
 }
 
 
-/* ==========================================================================
-   AA 3: AGGANCIO EVENTI (EVENT LISTENERS)
-   ========================================================================== */
+// AA 3: AGGANCIO EVENTI (EVENT LISTENERS)
 
 // BB: Listener Modulo di Login
 var loginForm = document.getElementById('login-form');

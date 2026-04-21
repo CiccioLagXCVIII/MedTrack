@@ -58,7 +58,7 @@ window.addEventListener('load', () => updateNetworkLED(navigator.onLine));
 
 // BB Funzioni Core di Boot e Navigazione
 function initApp() {
-    console.log("🚀 MedTrack Avviata");
+    console.log("%c🚀 ISFplan Avviata", "color: #bf4f8a; font-weight: bold; font-size: 14px;");
     document.getElementById('main-app').style.display = 'block';
     loadMonthDataFromSupabase(currentDate);
 }
@@ -85,11 +85,13 @@ function showView(viewId) {
     const btnCal = document.getElementById('nav-btn-cal');
     const btnCli = document.getElementById('nav-btn-cli');
     const btnTsk = document.getElementById('nav-btn-tsk');
+    const btnSet = document.getElementById('nav-btn-set');
 
     if (viewId === 'calendar-view') {
         btnCal.classList.add('active');
         btnCli.classList.remove('active');
         btnTsk.classList.remove('active');
+        btnSet.classList.remove('active');
         if (appState.calendarNeedsRefresh) {
             loadMonthDataFromSupabase(currentDate);
         }
@@ -97,6 +99,7 @@ function showView(viewId) {
         btnCli.classList.add('active');
         btnCal.classList.remove('active');
         btnTsk.classList.remove('active');
+        btnSet.classList.remove('active');
         if (appState.clientsNeedsRefresh) {
             // Svuota Filtri Silenziosamente Senza renderClients() Prima Che loadAllDataFromSupabase Aggiorni Lo Stato
             const search = document.getElementById('search-client');
@@ -114,9 +117,15 @@ function showView(viewId) {
         btnTsk.classList.add('active');
         btnCal.classList.remove('active');
         btnCli.classList.remove('active');
+        btnSet.classList.remove('active');
         if (appState.tasksNeedsRefresh) {
             renderTasks();
         }
+    } else if (viewId === 'settings-view') {
+        btnSet.classList.add('active');
+        btnCal.classList.remove('active');
+        btnCli.classList.remove('active');
+        btnTsk.classList.remove('active');
     }
 
     // CC Refresh icone Lucide dopo ogni cambio vista
@@ -584,7 +593,10 @@ function renderDayAppointments() {
 
     // DD: Helper interna per evitare ripetizione di codice per i pulsanti Phone, WA e Maps
     const generatePillButtons = (appOrWalkin) => {
-        const mapQuery = `${appOrWalkin.address || ''} ${appOrWalkin.city || ''}`.trim();
+        const address = (appOrWalkin.address || '').trim();
+        const city = (appOrWalkin.city || '').trim();
+        const mapQuery = (address && city) ? `${address}, ${city}` : (address || city);
+
         let cleanPhone = appOrWalkin.phone ? appOrWalkin.phone.replace(/\D/g, '') : '';
         if (cleanPhone && !cleanPhone.startsWith('39')) cleanPhone = '39' + cleanPhone;
 
@@ -699,7 +711,7 @@ async function markWalkinDone(id) {
     modalActionContext = 'walkin-done';
     modalTargetId = id;
     const client = walkinQueue.find(w => w.id === id);
-    document.getElementById('modal-time-title').innerText = "Visita Effettuata";
+    document.getElementById('modal-time-title').innerHTML = "Visita Effettuata";
     document.getElementById('modal-time-desc').innerText = `Orario per ${client.name}:`;
     document.getElementById('modal-time-input').value = dayjs().format('HH:mm');
     openModal('modal-time');
@@ -1247,7 +1259,13 @@ async function renderTasks() {
             </div>
         </div>
     </div>
-    `).join('') : `<div class="text-center py-5 mt-2"><p class="text-muted small">Nessun Task trovato.</p></div>`;
+    `).join('') : `<div class="text-center py-5 mt-4">
+                        <div class="mb-3 opacity-25">
+                            <i data-lucide="check-square" style="width: 48px; height: 48px;"></i>
+                        </div>
+                        <h6 class="text-muted fw-bold">Tutto In Ordine!</h6>
+                        <p class="text-secondary small">Nessuna Attività In Sospeso</p>
+                    </div>`;
     lucide.createIcons();
 }
 
@@ -1467,7 +1485,24 @@ function openModal(id) {
 function closeModal(id) {
     const modalEl = document.getElementById(id);
     const bsModal = bootstrap.Modal.getInstance(modalEl);
-    if (bsModal) bsModal.hide();
+    if (bsModal) {
+        // Toglie Focus Sa Qualunque Elemento Attivo
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+
+        // Chiude Il Modal
+        bsModal.hide();
+
+        // Attesa Che La Transizione Di Chiusura Sia Completa Prima Di Nascondere Completamente Il Modal E Rimuovere Il Backdrop
+        setTimeout(() => {
+            modalEl.setAttribute('aria-hidden', 'true');
+            // Rimozione Classe In Background
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+        }, 300);
+    }
 }
 
 // BB Apertura Modali Specifici
@@ -1548,32 +1583,48 @@ function openAddVisitModal(clientId) {
 }
 
 function openAlert(message) {
+    const modalEl = document.getElementById('modal-alert');
     const desc = document.getElementById('modal-alert-desc');
-    if (desc) {
+
+    if (modalEl && desc) {
         desc.innerText = message;
+
+        // Rimozione Focus Da Qualsiasi Elemento Attivo Prima Di Aprire Il Modal
+        if (document.activeElement) document.activeElement.blur();
+
         openModal('modal-alert');
     } else {
-        // Fallback se la modale non è ancora caricata nel DOM
         alert(message);
     }
 }
 
 // BB Interazioni Esterne
 function openNavigator(query) {
+    const defaultNav = localStorage.getItem('pref_defaultNav') || 'ask';
     const googleUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
     const wazeUrl = `https://waze.com/ul?q=${query}`;
 
-    document.getElementById('btn-nav-google').href = googleUrl;
-    document.getElementById('btn-nav-waze').href = wazeUrl;
+    if (defaultNav === 'google') {
+        window.open(googleUrl, '_blank');
+    } else if (defaultNav === 'waze') {
+        window.open(wazeUrl, '_blank');
+    } else {
+        // Se Impostato Su "Chiedi" Mostra Il Modal Con Le Opzioni
+        document.getElementById('btn-nav-google').href = googleUrl;
+        document.getElementById('btn-nav-waze').href = wazeUrl;
 
-    const closeMod = () => {
-        setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('modal-nav')).hide(); }, 500);
-    };
+        const closeMod = () => {
+            setTimeout(() => {
+                const mod = bootstrap.Modal.getInstance(document.getElementById('modal-nav'));
+                if (mod) mod.hide();
+            }, 500);
+        };
 
-    document.getElementById('btn-nav-google').onclick = closeMod;
-    document.getElementById('btn-nav-waze').onclick = closeMod;
+        document.getElementById('btn-nav-google').onclick = closeMod;
+        document.getElementById('btn-nav-waze').onclick = closeMod;
 
-    openModal('modal-nav');
+        openModal('modal-nav');
+    }
 }
 
 // ==========================================================================

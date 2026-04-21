@@ -1,5 +1,5 @@
 /* AA GESTIONE OFFLINE AVANZATA (CACHE & OUTBOX PATTERN) */
-const DB_NAME = 'MedTrackOfflineDB';
+const DB_NAME = 'ISFplanOfflineDB';
 const CACHE_STORE = 'cacheStore';
 const QUEUE_STORE = 'syncQueue';
 
@@ -155,7 +155,7 @@ async function processSyncQueue() {
         const finalMsg = "Sincronizzati: " + msgParts.join(", ");
 
         if (typeof NotificationManager !== 'undefined') {
-            NotificationManager.sendLocalNotification("MedTrack Aggiornato", finalMsg);
+            NotificationManager.sendLocalNotification("ISFplan Aggiornato", finalMsg);
         }
     }
 

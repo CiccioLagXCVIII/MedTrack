@@ -1,76 +1,141 @@
-[id^="slot-"] {
-    animation: slideDown 0.2s ease-out;
-    border-left: 4px solid var(--primary) !important;
+/* AA HEADER E NAVIGAZIONE MOBILE */
+
+/* BB Header Principale */
+.header-inner {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 }
 
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.time-from,
-.time-to {
-    max-width: 90px !important;
-    border: 1px solid #ddd !important;
-    padding: 2px 5px !important;
-    height: 30px !important;
-    font-size: 0.85rem !important;
-}
-
-.notify-float-btn {
-    border-radius: var(--radius-md) !important;
-    position: fixed;
-    left: 20px;
-    /* Speculare al right: 20px del logout */
-    width: 45px;
-    height: 45px;
-    background: var(--bg-white);
+.navbar {
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding-top: calc(env(safe-area-inset-top) + 0.5rem) !important;
     z-index: 1000;
-    border: 1px solid var(--border-color) !important;
+}
+
+.logo-nav {
+    width: 35px;
+    height: 35px;
+}
+
+.navbar-brand {
+    padding: 0;
+    margin: 0;
+    margin-right: 0 !important;
+    display: flex !important;
+    align-items: center;
+}
+
+.navbar-brand span {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #334155 !important;
+    /* Assicurato colore scuro visibile */
+    letter-spacing: -0.3px;
+    display: inline-block !important;
+    /* Forza visibilità */
+}
+
+/* CC Stato Rete */
+.status-led {
+    min-width: 12px;
+    min-height: 12px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+/* CC Stati Led */
+.status-led.online {
+    background-color: #22c55e !important;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+.status-led.offline {
+    background-color: #ef4444 !important;
+    box-shadow: 0 0 8px #ef4444;
+}
+
+.status-led.syncing {
+    background-color: #3b82f6 !important;
+    box-shadow: 0 0 10px #3b82f6;
+    animation: pulse-led 0.8s infinite alternate;
+}
+
+/* BB Bottom Navigation Bar */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1050;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: none;
+    background: none;
+    color: #94a3b8;
+    font-size: 0.65rem;
+    font-weight: 700;
+    gap: 4px;
+    padding: 8px;
+    transition: color 0.2s;
+}
+
+.nav-btn.active {
+    color: #bf4f8a;
+}
+
+.nav-btn-plus {
+    background: #bf4f8a;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    bottom: calc(env(safe-area-inset-bottom, 20px) + 20px) !important;
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(191, 79, 138, 0.3);
+    margin-top: -30px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Colori specifici quando le notifiche sono attive */
-.notify-float-btn.active-notify {
-    color: var(--primary-dark) !important;
-    border-color: var(--primary) !important;
-    background-color: var(--primary-light) !important;
+.nav-btn-plus:active {
+    transform: scale(0.9) translateY(-25px);
 }
 
-/* Colori quando l'utente ha bloccato le notifiche */
-.notify-float-btn.denied-notify {
-    color: var(--danger) !important;
-    border-color: #fca5a5 !important;
-    background-color: #fef2f2 !important;
-}
+/* AA REPORT GIORNALIERO E DASHBOARD */
 
-/* ==========================================================================
-   DASHBOARD BRIEFING - PREMIUM REDESIGN
-   ========================================================================== */
-
+/* BB Layout Report */
 .report-body {
     background: linear-gradient(180deg, #fffafa 0%, #f8f9fc 100%) !important;
     font-family: 'Inter', sans-serif;
     color: #2d3748;
 }
 
-/* Header: Allineamento perfetto */
 .report-header {
     padding-top: 10px;
     margin-bottom: 25px;
 }
 
+/* BB Componenti UI Report */
 .btn-back-circle {
     width: 40px;
     height: 40px;
@@ -95,148 +160,152 @@
     -webkit-text-fill-color: transparent;
 }
 
-.report-subtitle {
-    font-size: 0.85rem;
-    color: #718096;
-    font-weight: 500;
-    margin-top: 2px;
+/* AA Menu Rapido */
+/* --- AA: FUMETTO QUICK ADD --- */
+.quick-add-menu {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    width: 250px;
 }
 
-.report-badge-today {
-    background: #fff5f7;
-    color: #bf4f8a;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    border: 1px solid #ffc0cb;
+.menu-content {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    animation: scaleUp 0.2s ease-out;
 }
 
-/* Stats Card: Stile Widget */
-.report-stats-card .card {
-    background: #ffffff;
-    border-radius: 20px !important;
-    border: none !important;
-    box-shadow: 0 10px 25px -5px rgba(191, 79, 138, 0.1) !important;
-    position: relative;
-    overflow: hidden;
-}
-
-.report-stats-card .card::before {
+.menu-content::after {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 6px;
-    background: #bf4f8a;
+    bottom: -10px;
+    left: 50%;
+    margin-left: -17px;
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: white transparent;
 }
 
-.stats-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #a0aec0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.stats-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #2d3748;
-    margin-top: 5px;
-}
-
-.stats-icon-bg {
-    width: 50px;
-    height: 50px;
-    background: #fff5f7;
-    border-radius: 15px;
+.menu-item {
+    border: none;
+    background: none;
+    padding: 12px 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
-}
-
-.stats-icon-bg i {
-    width: 24px;
-    height: 24px;
-    stroke: #bf4f8a;
-}
-
-/* Sezione Timeline */
-.section-divider-title {
+    gap: 12px;
+    font-weight: 600;
     font-size: 0.9rem;
-    font-weight: 700;
-    color: #4a5568;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.section-divider-title::after {
-    content: '';
-    flex-grow: 1;
-    height: 1px;
-    background: #e2e8f0;
-}
-
-/* Card Visita: Migliorata */
-.visit-report-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #edf2f7;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.visit-time-badge {
-    background: #bf4f8a;
-    /* Colore pieno per risaltare */
-    padding: 10px 5px;
+    color: #334155;
     border-radius: 12px;
-    min-width: 60px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(191, 79, 138, 0.2);
+    transition: background 0.2s;
 }
 
-.visit-time-badge .time-val {
-    color: #ffffff;
+.menu-item:hover {
+    background: #f8fafc;
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* AA Modals */
+.label-custom-sm {
+    font-size: 0.7rem;
     font-weight: 800;
-    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 6px;
+    margin-left: 2px;
+    letter-spacing: 0.5px;
 }
 
-.visit-info h4 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 3px;
+.modal-content {
+    border-radius: 24px !important;
+    border: none !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15) !important;
 }
 
-.visit-info p {
-    font-size: 0.8rem;
-    color: #718096;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.modal-content .form-control:focus,
+.modal-content .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(191, 79, 138, 0.15) !important;
 }
 
-/* Animazione di ingresso */
-.visit-report-card {
-    animation: slideUp 0.5s ease-out forwards;
+.modal-header {
+    padding: 24px 24px 0 24px !important;
+}
+
+.modal-title {
+    font-size: 1.25rem !important;
+    letter-spacing: -0.5px;
+    color: #1e293b;
+}
+
+.modal-body {
+    padding: 24px !important;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    padding: 12px 16px !important;
+    border-radius: 14px !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.modal-body .form-control:focus {
+    background-color: #ffffff !important;
+    border-color: var(--primary) !important;
+}
+
+.modal-footer {
+    padding: 0 24px 24px 24px !important;
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+    transform: scale(0.95);
     opacity: 0;
 }
 
-@keyframes slideUp {
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* AA Utility E Animazioni */
+
+/* BB Animazioni Selettore */
+
+
+@keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(-10px);
     }
 
     to {
@@ -245,21 +314,31 @@
     }
 }
 
-/* Pulse per il badge LIVE */
-.pulse-animation {
-    animation: pulse-border 2s infinite;
+/* BB Spaziatura Globale */
+body {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
-@keyframes pulse-border {
-    0% {
-        box-shadow: 0 0 0 0 rgba(191, 79, 138, 0.4);
+.view {
+    padding-bottom: 20px;
+}
+
+/* BB Pulsazione LED */
+@keyframes pulse-led {
+    from {
+        opacity: 0.4;
     }
 
-    70% {
-        box-shadow: 0 0 0 8px rgba(191, 79, 138, 0);
+    to {
+        opacity: 1;
     }
+}
 
-    100% {
-        box-shadow: 0 0 0 0 rgba(191, 79, 138, 0);
-    }
+/* BB Effetto Pressione */
+.btn:active,
+.appointment-item:active,
+.client-card:active,
+.task-card:active {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s ease;
 }

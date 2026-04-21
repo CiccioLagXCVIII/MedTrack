@@ -54,7 +54,7 @@ function sendLocalNotification(title, body, targetUrl = null) {
             icon: 'icon/siteIcon.png',
             badge: 'icon/siteIcon.png',
             vibrate: [200, 100, 200],
-            tag: targetUrl ? 'morning-report' : 'medtrack-alert',
+            tag: targetUrl ? 'morning-report' : 'ISFplan-alert',
             renotify: true,
             data: { url: targetUrl }
         });
@@ -97,7 +97,8 @@ function scheduleAllTodayVisits(visits) {
         if (scheduledNotifications.has(visitId)) return;
 
         const visitDateTime = dayjs(`${visit.data_visita} ${visit.ora_visita}`);
-        const notificationTime = visitDateTime.subtract(15, 'minute');
+        const prefMinutes = parseInt(localStorage.getItem('pref_notifyTime') || '15');
+        const notificationTime = visitDateTime.subtract(prefMinutes, 'minute');
 
         if (notificationTime.isAfter(now)) {
             const delayMs = notificationTime.diff(now);
@@ -123,13 +124,16 @@ function scheduleAllTodayVisits(visits) {
 
 async function toggleNotifications() {
     const p = Notification.permission;
-    if (p === 'default') {
-        // Chiamata alla funzione async per i permessi
+
+    if (p === 'granted') {
+        // sendLocalNotification("ISFplan", "Le Notifiche Sono Già Attive!");
+        openAlert("Le Notifiche Sono Già Attive! Per Disattivarle, Usa Le Impostazion Del Browser");
+    } else if (p === 'denied') {
+        openAlert("Sblocca Le Notifiche Nelle Impostazioni Del Browser Per Usarle");
+    } else if (p === 'default') {
         await requestPermission();
-    } else if (p === 'granted') {
-        sendLocalNotification("MedTrack", "Le Notifiche Sono Già Attive!");
     } else {
-        if (typeof openAlert === 'function') openAlert("Sblocca Le Notifiche Nelle Impostazioni Del Browser Per Usarle");
+        openAlert("Stato Notifiche Sconosciuto. Riprova.");
     }
 }
 

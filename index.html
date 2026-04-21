@@ -8,29 +8,28 @@
         <!-- AA 1: META TAGS ESSENZIALI -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>MedTrack | Professional ISF Agenda</title>
+        <title>ISF Plan | Professional ISF Agenda</title>
         <!-- BB Tags Condivisione -->
         <!-- Primary Meta Tags -->
-        <meta name="title" content="MedTrack | Agenda Professionale ISF">
+        <meta name="title" content="ISF Plan | Agenda Professionale ISF">
         <meta name="description"
             content="Gestione Intelligente Delle Visite Mediche, Monitoraggio Frequenza E Pianificazione Itinerari Per Informatori Scientifici.">
 
         <!-- Open Graph / Facebook / WhatsApp -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="https://medtrack-agenda.netlify.app/">
-        <meta property="og:title" content="MedTrack | Agenda Professionale ISF">
+        <meta property="og:url" content="https://isf-plan.pages.dev/">
+        <meta property="og:title" content="ISF Plan | Agenda Professionale ISF">
         <meta property="og:description"
             content="Ottimizza I Tuoi Spostamenti E Non Perdere Mai Una Visita. Il Compagno Digitale Per L'ISF Moderno.">
-        <!-- IMPORTANTE: Usa l'URL assoluto per l'immagine -->
-        <meta property="og:image" content="https://medtrack-agenda.netlify.app/icon/siteLogo.png">
+        <meta property="og:image" content="https://isf-plan.pages.dev/icon/siteLogo.png">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="https://medtrack-agenda.netlify.app/">
-        <meta property="twitter:title" content="MedTrack | Professional ISF Agenda">
+        <meta property="twitter:url" content="https://isf-plan.pages.dev/">
+        <meta property="twitter:title" content="ISF Plan | Professional ISF Agenda">
         <meta property="twitter:description"
-            content="Pianificazione Visite E Gestione Medici In Un'unica Dashboard SaaS.">
-        <meta property="twitter:image" content="https://medtrack-agenda.netlify.app/icon/siteLogo.png">
+            content="Pianificazione Visite E Gestione Medici In Un'Unica Dashboard Intelligente.">
+        <meta property="twitter:image" content="https://isf-plan.pages.dev/icon/siteLogo.png">
 
         <!-- AA 2: CONFIGURAZIONE PWA E MOBILE (iOS & Android) -->
         <!-- BB 2.1: Colore Tema E Manifest -->
@@ -41,7 +40,7 @@
         <!-- BB 2.2: Ottimizzazione Specifica Per iPhone -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="MedTrack">
+        <meta name="apple-mobile-web-app-title" content="ISFplan">
         <link rel="apple-touch-icon" href="icon/siteLogo.png">
 
         <!-- BB 2.3: Icone Scheda Browser -->
@@ -71,56 +70,35 @@
         <!-- CC 5.1: Configurazione, Auth e Core Logic -->
         <script src="config.js" defer></script>
         <script src="auth.js" defer></script>
-        <!-- 
         <script src="script.js" defer></script>
-        <script src="scriptProFeature.js" defer></script>
-        -->
-        <script src="scriptPro.js" defer></script>
+        <script src="scriptProFeatures.js" defer></script>
         <!-- CC 5.2: Gestione Installazione PWA (Service Worker) -->
         <script src="pwaManager.js" defer></script>
         <!-- CC 5.3: Gestione Offline -->
         <script src="notificationManager.js" defer></script>
         <script src="offlineManager.js" defer></script>
+        <!-- Sotto notificationManager.js -->
+        <!-- <script src="featuresDebug.js"></script> -->
     </head>
 
     <body>
         <div id="main-app">
-
-            <!-- AA NAVBAR -->
-            <nav class="navbar navbar-expand bg-white shadow-sm sticky-top border-bottom py-2">
-                <div class="container px-3">
+            <!-- AA Header -->
+            <nav class="navbar container-fluid bg-white shadow-sm sticky-top border-bottom py-2">
+                <div class="header-inner px-3">
                     <a class="navbar-brand d-flex align-items-center gap-2" href="#"
                         onclick="showView('calendar-view')">
                         <img src="icon/siteLogo.png" alt="Logo" class="logo-nav">
-                        <span class="fw-bolder d-none d-sm-inline">MedTrack</span>
+                        <span class="fw-bolder">ISFplan</span>
                         <span id="network-led" class="status-led online" title="Connesso"></span>
                     </a>
-
-                    <div class="d-flex gap-1 bg-light p-1 rounded-pill border shadow-sm" id="main-nav">
-                        <!-- CALENDARIO -->
-                        <button class="btn nav-btn-custom active" onclick="showView('calendar-view')" id="nav-btn-cal">
-                            <i data-lucide="calendar" class="icon-nav"></i>
-                            <span>CALENDARIO</span>
-                        </button>
-
-                        <!-- MEDICI -->
-                        <button class="btn nav-btn-custom" onclick="showView('clients-view')" id="nav-btn-cli">
-                            <i data-lucide="users" class="icon-nav"></i>
-                            <span>MEDICI</span>
-                        </button>
-
-                        <!-- TASK -->
-                        <button class="btn nav-btn-custom" onclick="showView('tasks-view')" id="nav-btn-tsk">
-                            <i data-lucide="check-square" class="icon-nav"></i>
-                            <span>TASK</span>
-                        </button>
-                    </div>
                 </div>
             </nav>
 
+            <!-- AA Container Principale -->
             <div class="container-fluid py-3 flex-grow-1">
 
-                <!-- BB VISTA CALENDARIO -->
+                <!-- BB Vista Calendario -->
                 <div id="calendar-view" class="view active">
                     <!-- Header compatto -->
                     <div
@@ -140,7 +118,7 @@
                     <div id="calendar-grid" class="calendar-grid"></div>
                 </div>
 
-                <!-- BB VISTA GIORNO -->
+                <!-- BB Vista Giorno Corrente -->
                 <div id="day-view" class="view">
                     <button
                         class="btn btn-outline-secondary mb-3 d-flex align-items-center gap-2 rounded-pill px-3 shadow-sm"
@@ -189,23 +167,28 @@
                                 <div id="new-client-div" class="d-flex flex-column gap-3 w-100">
 
                                     <!-- Riga 1: Nome -->
+                                    <label for="new-client-name" class="visually-hidden">Nome Medico</label>
                                     <input type="text" id="new-client-name" class="form-control"
                                         placeholder="Nome Medico">
 
                                     <!-- Riga 2: Città e Indirizzo (Smezzati perfetti al 50% con spazio in mezzo) -->
                                     <div class="d-flex gap-2 w-100">
+                                        <label for="new-client-city" class="visually-hidden">Città</label>
                                         <input type="text" id="new-client-city" class="form-control w-50"
                                             placeholder="Città">
+                                        <label for="new-client-address" class="visually-hidden">Indirizzo</label>
                                         <input type="text" id="new-client-address" class="form-control w-50"
                                             placeholder="Indirizzo">
                                     </div>
 
                                     <!-- Riga 3: Cellulare -->
+                                    <label for="new-client-phone" class="visually-hidden">Cellulare</label>
                                     <input type="tel" id="new-client-phone" class="form-control"
                                         placeholder="Cellulare">
 
                                     <!-- Riga 4: Specializzazione Dinamica (Smezza al 50% solo se si clicca "+ Altro") -->
                                     <div class="d-flex gap-2 w-100">
+                                        <label for="new-client-spec" class="visually-hidden">Specializzazione</label>
                                         <select id="new-client-spec" class="form-select w-100"
                                             onchange="checkOtherSpec(this)" required></select>
                                         <input type="text" id="custom-spec-input" class="form-control w-50 display-none"
@@ -216,6 +199,7 @@
 
                                 <!-- GRUPPO MEDICO ESISTENTE (Nascosto Di Default) -->
                                 <div id="existing-client-div" class="display-none w-100">
+                                    <label for="existing-client-select" class="visually-hidden">Medico Esistente</label>
                                     <select id="existing-client-select" class="form-select w-100"></select>
                                 </div>
 
@@ -288,7 +272,7 @@
                     </div>
                 </div>
 
-                <!-- BB VISTA ANAGRAFICA -->
+                <!-- BB Vista Anagrafica -->
                 <div id="clients-view" class="view">
                     <!-- SEARCH & FILTER BAR (Sticky su mobile) -->
                     <div class="sticky-top bg-light pt-2" style="z-index: 100;">
@@ -360,10 +344,8 @@
                     <div id="clients-container" class="mt-2"></div>
                 </div>
 
-                <!-- BB VISTA TASKS -->
+                <!-- BB Vista Tasks -->
                 <div id="tasks-view" class="view">
-
-                    <!-- HEADER -->
                     <!-- HEADER E FILTRI -->
                     <div class="d-flex justify-content-between align-items-end mb-3 px-1 border-bottom pb-3">
                         <div>
@@ -403,21 +385,153 @@
                         <!-- I task verranno renderizzati qui da JS -->
                     </div>
                 </div>
+
+                <!-- BB Vista Impostazioni -->
+                <div id="settings-view" class="view">
+                    <h2 class="h4 fw-bold mb-4 px-2">Impostazioni</h2>
+
+                    <!-- CC Sezione Navigazione E Notifiche -->
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3 px-2">Preferenze App</h6>
+                    <div class="settings-card mb-4">
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="bell" style="color: #bf4f8a;"></i> Notifiche Push
+                            </div>
+                            <div class="settings-value">
+                                <button id="btn-toggle-notify" class="btn btn-outline-primary btn-sm rounded-pill"
+                                    onclick="toggleNotifications()"></button>
+                            </div>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="timer" style="color: #64748b;"></i> Preavviso Visita
+                            </div>
+                            <div class="settings-value">
+                                <select id="pref-notify-time"
+                                    class="form-select form-select-sm border-0 bg-light fw-bold"
+                                    onchange="updatePref('notifyTime', this.value)">
+                                    <option value="5">5 m</option>
+                                    <option value="15" selected>15 m</option>
+                                    <option value="30">30 m</option>
+                                    <option value="60">1 h</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="map" style="color: #3b82f6;"></i> Navigatore
+                            </div>
+                            <div class="settings-value">
+                                <select id="pref-navigator" class="form-select form-select-sm border-0 bg-light fw-bold"
+                                    onchange="updatePref('defaultNav', this.value)">
+                                    <option value="ask">Chiedi</option>
+                                    <option value="google">Maps</option>
+                                    <option value="waze">Waze</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CC Sezione Dati E Sincronizzazione -->
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3 px-2">Gestione Dati</h6>
+                    <div class="settings-card mb-4">
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="refresh-cw" style="color: #22c55e;"></i> Cloud Sync
+                            </div>
+                            <div class="settings-value">
+                                <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold"
+                                    onclick="forceSync()">Sincronizza</button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="trash-2" style="color: #ef4444;"></i> Cache Locale
+                            </div>
+                            <div class="settings-value">
+                                <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold"
+                                    onclick="clearAppCache()">Pulisci</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CC Sezione Supporto E Info -->
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3 px-2">Supporto</h6>
+                    <div class="settings-card mb-4">
+                        <div class="settings-item" onclick="reportProblem()" style="cursor:pointer">
+                            <div class="settings-label">
+                                <i data-lucide="life-buoy" style="color: #f59e0b;"></i> Segnala Problema
+                            </div>
+                            <div class="settings-value">
+                                <i data-lucide="chevron-right" class="text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-label">
+                                <i data-lucide="info" style="color: #64748b;"></i> Versione App
+                            </div>
+                            <div class="settings-value">
+                                <span class="text-muted small fw-bold">1.6.2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CC Bottone Logout -->
+                    <button class="btn btn-logout-custom w-100 py-3 rounded-4 mb-5" onclick="handleLogout()">
+                        <i data-lucide="log-out"></i> Esci Dall'Account
+                    </button>
+                </div>
             </div>
+        </div>
 
-            <!-- AA Tasto Notifiche (In Basso A Sinistra) -->
-            <button id="btn-toggle-notify"
-                class="btn btn-white text-secondary border shadow-sm fw-bold notify-float-btn"
-                onclick="toggleNotifications()">
-                <i data-lucide="bell"></i>
+        <!-- AA Menu Rapido -->
+        <div id="quick-add-menu" class="quick-add-menu d-none">
+            <div class="menu-backdrop" onclick="toggleQuickMenu()"></div>
+            <div class="menu-content">
+                <button class="menu-item" onclick="toggleQuickMenu(); openJumpToDateModal();">
+                    <i data-lucide="calendar-search"></i> Vai A Data
+                </button>
+                <button class="menu-item" onclick="toggleQuickMenu(); goToToday();">
+                    <i data-lucide="calendar-check"></i> Vai A Oggi
+                </button>
+                <button class="menu-item" onclick="toggleQuickMenu(); openAddTaskModal();">
+                    <i data-lucide="check-square"></i> Nuovo Task
+                </button>
+            </div>
+        </div>
+
+        <!-- AA Navbar Inferiore -->
+        <div class="bottom-nav">
+            <!-- BB Bottone Calendario -->
+            <button class="nav-btn active" onclick="showView('calendar-view')" id="nav-btn-cal">
+                <i data-lucide="calendar"></i>
+                <span>Agenda</span>
             </button>
 
-            <!-- AA Tasto Logout (In Basso A Destra) -->
-            <button class="btn btn-white text-danger border shadow-sm fw-bold logout-float-btn"
-                onclick="handleLogout()">
-                <i data-lucide="log-out"></i>
+            <!-- BB Bottone Anagrafica -->
+            <button class="nav-btn" onclick="showView('clients-view')" id="nav-btn-cli">
+                <i data-lucide="users"></i>
+                <span>Medici</span>
             </button>
 
+            <!-- BB Bottone Centrale -->
+            <button class="nav-btn-plus" onclick="toggleQuickMenu()">
+                <i data-lucide="plus"></i>
+            </button>
+
+            <!-- BB Bottone Task -->
+            <button class="nav-btn" onclick="showView('tasks-view')" id="nav-btn-tsk">
+                <i data-lucide="check-square"></i>
+                <span>Task</span>
+            </button>
+
+            <!-- BB Bottone Impostazioni -->
+            <button class="nav-btn" onclick="showView('settings-view')" id="nav-btn-set">
+                <i data-lucide="settings"></i>
+                <span>Impostazioni</span>
+            </button>
         </div>
 
         <div id="modal-placeholder"></div>
