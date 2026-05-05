@@ -3,6 +3,9 @@ const DB_NAME = 'ISFplanOfflineDB';
 const CACHE_STORE = 'cacheStore';
 const QUEUE_STORE = 'syncQueue';
 
+// Flag Sincronizzazione In Corso
+let _isSyncing = false;
+
 async function initIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, 2);
@@ -52,8 +55,15 @@ async function clearSyncQueue() {
 async function processSyncQueue() {
     if (!navigator.onLine) return;
 
+    if (_isSyncing) {
+        console.log('⏳ Sync Già In Corso!');
+        return;
+    }
+
     const queue = await getSyncQueue();
     if (queue.length === 0) return;
+
+    _isSyncing = true;
 
     // BB: Ordiniamo la coda per garantire che i Medici vengano creati prima delle Visite
     // DD: 'medici' (INSERT) deve venire prima di 'visite' (INSERT)
@@ -108,6 +118,7 @@ async function processSyncQueue() {
                 console.error(`❌ Sync Fallita Per ${item.table}:`, error);
                 // In caso di errore spegniamo il LED (evita l'effetto loop) e interrompiamo.
                 // L'elemento rimane in coda per il prossimo tentativo.
+                _isSyncing = false;
                 updateNetworkLED('online');
                 return;
             }
@@ -135,6 +146,7 @@ async function processSyncQueue() {
 
         } catch (err) {
             console.error("Errore Critico Durante La Sincronizzazione:", err);
+            _isSyncing = false;
             updateNetworkLED('online');
             return;
         }
@@ -159,6 +171,7 @@ async function processSyncQueue() {
         }
     }
 
+    _isSyncing = false;
     updateNetworkLED('online'); // Torna LED Verde
 
     // Ricarichiamo i dati a schermo per allinearli al Server
@@ -180,7 +193,7 @@ async function processSyncQueue() {
 
 // Network Listener
 window.addEventListener('online', () => {
-    updateNetworkLED(true);
+    updateNetworkLED('online');
     processSyncQueue();
 });
 window.addEventListener('offline', () => updateNetworkLED(false));

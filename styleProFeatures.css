@@ -125,39 +125,297 @@
 
 /* BB Layout Report */
 .report-body {
-    background: linear-gradient(180deg, #fffafa 0%, #f8f9fc 100%) !important;
+    background: #fafafa !important;
     font-family: 'Inter', sans-serif;
-    color: #2d3748;
+    color: #1e293b;
+    min-height: 100vh;
 }
 
+.report-container {
+    max-width: 620px;
+    padding: 24px 20px 60px;
+}
+
+/* BB Header */
 .report-header {
-    padding-top: 10px;
-    margin-bottom: 25px;
+    padding-top: 16px;
+    margin-bottom: 32px;
 }
 
-/* BB Componenti UI Report */
 .btn-back-circle {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     background: #ffffff;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #bf4f8a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
     text-decoration: none !important;
     border: 1px solid #fce4e8;
+    flex-shrink: 0;
+    transition: box-shadow 0.2s ease;
+}
+
+.btn-back-circle:hover {
+    box-shadow: 0 4px 16px rgba(191, 79, 138, 0.15);
 }
 
 .report-title {
-    font-size: 1.5rem !important;
+    font-size: 2rem !important;
     font-weight: 800;
     margin: 0;
-    line-height: 1.2;
-    background: linear-gradient(45deg, #bf4f8a, #d4418e);
+    line-height: 1.1;
+    background: linear-gradient(135deg, #bf4f8a 0%, #e05fa0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.report-subtitle {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin: 4px 0 0;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* BB Badge LIVE */
+.report-badge-today {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #bf4f8a;
+    background: #fff0f6;
+    border: 1.5px solid #fbbdd4;
+    border-radius: 50px;
+    padding: 5px 12px;
+    flex-shrink: 0;
+}
+
+.pulse-animation {
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* BB Card Statistiche */
+.report-stats-card .card {
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, #bf4f8a 0%, #d4418e 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 24px rgba(191, 79, 138, 0.25) !important;
+}
+
+.stats-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.stats-value {
+    font-size: 3.5rem !important;
+    font-weight: 800;
+    color: #ffffff !important;
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -2px;
+}
+
+.stats-icon-bg {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.stats-icon-bg i {
+    width: 28px;
+    height: 28px;
+}
+
+/* BB Sezione Lista */
+.section-divider-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    padding-left: 4px;
+}
+
+/* BB Card Visita (Timeline) */
+.report-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.visit-report-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: slideUpFade 0.4s ease both;
+}
+
+.visit-report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Numero progressivo */
+.visit-num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    letter-spacing: -1px;
+    min-width: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+/* Info medico */
+.visit-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.visit-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.visit-meta {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.visit-meta i {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
+}
+
+/* Colonna destra: orario + navigatore */
+.visit-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.visit-time-badge {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #bf4f8a;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.visit-nav-btn {
+    width: 32px;
+    height: 32px;
+    background: #fff0f6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bf4f8a;
+    text-decoration: none;
+    border: 1px solid #fbbdd4;
+    transition: background 0.2s ease;
+}
+
+.visit-nav-btn:hover {
+    background: #fbbdd4;
+    color: #bf4f8a;
+}
+
+.visit-nav-btn i {
+    width: 14px;
+    height: 14px;
+}
+
+/* BB Stato vuoto */
+.report-empty {
+    text-align: center;
+    padding: 48px 20px;
+}
+
+.report-empty .empty-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+}
+
+.report-empty h5 {
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.report-empty p {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 0;
 }
 
 /* AA Menu Rapido */

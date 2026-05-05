@@ -5,10 +5,9 @@
 
 <div align="center">
 
-![Versione](https://img.shields.io/badge/Versione-1.6.2-deeppink)
+![Versione](https://img.shields.io/badge/Versione-1.6-blue)
 ![Stato](https://img.shields.io/badge/Stato-Production--Ready-success)
 ![PWA](https://img.shields.io/badge/PWA-Installable-purple)
-![Offline](https://img.shields.io/badge/Offline-Support-blue)
 ![Stack](https://img.shields.io/badge/Stack-Vanilla_JS--Supabase--PostgreSQL-orange)
 
 </div>
@@ -23,7 +22,6 @@ Il progetto risolve le sfide logistiche quotidiane di un **Informatore Scientifi
 *   **Monitoraggio Target (Color Coding):** Calcolo automatico dei giorni trascorsi dall'ultima visita con alert cromatici immediati (Verde/Giallo/Rosso/Blu).
 *   **Logistica One-Click:** Scelta rapida tra navigazione via Google Maps o Waze e pulsanti per chiamate/WhatsApp diretti.
 *   **Gestione Multi-Utente Sicura:** Sistema di login e compartimentazione dei dati. Nessun ISF può vedere i dati di un altro collega.
-*   **Continuità Operativa:** Progettata per funzionare all'interno di ospedali o strutture schermate grazie al motore di sincronizzazione offline.
 
 ---
 
@@ -34,19 +32,17 @@ Se sei un Informatore Scientifico, un collega o un utente interessato a utilizza
 👉 **Devi essere aggiunto manualmente alla Whitelist.**
 
 📧 **Come richiedere l'accesso:**
-Scrivimi un'email all'indirizzo **francescolv78@gmail.com** specificando che vorresti provare ISFplan. Provvederò personalmente a creare il tuo account sicuro e a inviarti le credenziali di accesso per iniziare a usare la piattaforma.
+Scrivimi un'email all'indirizzo **francescoloverde05@gmail.com** specificando che vorresti provare ISFplan. Provvederò personalmente a creare il tuo account sicuro e a inviarti le credenziali di accesso per iniziare a usare la piattaforma.
 
 ---
 
-## 🛠️ Architettura Tecnica & Stack
-L'app è costruita seguendo i principi del **Modern Web Development**, privilegiando la velocità di esecuzione e la leggerezza dei pacchetti:
-
-*   **Frontend PWA:** HTML5, CSS3 (Variabili CSS, Flexbox/Grid), JavaScript Moderno (ES6+ Vanilla).
-*   **UI/UX Premium:** Bootstrap 5 (utility), [Lucide Icons](https://lucide.dev/), e **Skeleton Loading** animati per azzerare la percezione dei tempi di caricamento.
-*   **Gestione Date:** [Day.js](https://day.js.org/) con localizzazione italiana per calcoli di scadenze e calendari.
-*   **Backend & Database (BaaS):** [Supabase](https://supabase.com/) (PostgreSQL). Utilizzo di **SQL Views** (`medici_con_stato_visite`) per demandare calcoli complessi al server.
-*   **Sicurezza:** Integrazione **Supabase Auth** e **Row Level Security (RLS)** per l'isolamento dei dati per singolo utente.
-*   **Integrazioni:** API URL-based per Google Maps, Waze e WhatsApp.
+## 🛠️ Architettura Tecnica
+*   **Frontend PWA:** HTML5, CSS3 (Variabili CSS, Flexbox/Grid), JavaScript Moderno (ES6+ Vanilla). Nessun framework pesante.
+*   **UI/UX:** Bootstrap 5 (solo griglia e utility), [Lucide Icons](https://lucide.dev/), Modali caricati dinamicamente via `fetch` per un DOM pulito.
+*   **Gestione Date:** [Day.js](https://day.js.org/) (Localizzazione IT) per calcoli temporali complessi.
+*   **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL). Utilizzo avanzato di **Viste SQL (Views)** per demandare il calcolo delle date al database, azzerando i lag sul client.
+*   **Sicurezza:** Autenticazione Supabase Auth e **Row Level Security (RLS)** su tabelle e viste.
+*   **Offline-First:** Service Worker (`sw.js`) per caching delle risorse e `IndexedDB` (`offlineManager.js`) per gestire le code di sincronizzazione (Outbox Pattern).
 
 ---
 
@@ -55,10 +51,9 @@ L'app è costruita seguendo i principi del **Modern Web Development**, privilegi
 ### 1. Sistema di Accesso Protette (Auth)
 Interfaccia di login dedicata con gestione sicura delle sessioni. Reindirizzamento automatico e blocco delle rotte non autorizzate tramite "Middleware" client-side.
 
-### 2. Dashboard Calendario & LED di Stato
+### 2. Dashboard Calendario
 *   Visualizzazione mensile con badge numerici dinamici per il carico di lavoro.
 *   **Smart Highlighting:** Giorno corrente evidenziato, festivi e prefestivi cromaticamente differenziati.
-*   **Network LED:** Un indicatore visivo in tempo reale (Verde/Rosso/Blu) che mostra se l'utente è Online, Offline o in fase di Sincronizzazione.
 
 ### 3. Anagrafica Medici (Smart Card System)
 Sistema di monitoraggio visivo guidato dal database (Vista SQL ottimizzata):
@@ -66,76 +61,70 @@ Sistema di monitoraggio visivo guidato dal database (Vista SQL ottimizzata):
 *   🟢 **In Target:** Visitato da meno di 15 giorni.
 *   🟡 **Warning:** Visita necessaria (15-29 giorni).
 *   🔴 **Urgente:** Fuori target (>= 30 giorni).
-*   Metriche precise: Giorni esatti dall'ultima visita e anteprima dell'ultima nota clinica/commerciale.
+*   Filtri live per ricerca testuale, specializzazione, città e stato visita.
 
-### 4. Gestione Giornaliera Dual-Tab (Scheduled vs Walk-in)
-*   **Scheduled:** Appuntamenti fissati con orario preciso.
-*   **Liberi (Walk-in):** Gestione avanzata multi-fascia. Il sistema mostra solo i medici disponibili per il giorno corrente e supporta la "promozione a visita" istantanea.
+### 4. Gestione Giornaliera Dual-Tab
+Flusso di lavoro diviso in due modalità:
+*   **Scheduled:** Appuntamenti prefissati con orario esatto.
+*   **Liberi (Walk-in):** Coda intelligente che mostra *solo* i medici che ricevono senza appuntamento nel giorno corrente della settimana e che non sono ancora stati visitati oggi.
 
 ### 5. Gestione Attività (Task System)
-*   To-Do List integrata per chiamate, richieste appuntamenti o task amministrativi.
-*   Collegamento dinamico ai medici in anagrafica e sistema di priorità cromatico (Bassa/Media/Alta).
+*   To-Do List integrata per segnare chiamate, appuntamenti da prendere o attività burocratiche.
+*   Possibilità di collegare un Task a un medico specifico dall'anagrafica.
+*   Sistema di priorità visivo e filtraggio rapido (Da Fare, Completati, Relativi a Medici, Generici).
 
-### 6. Briefing Giornaliero (Daily Report)
-Una schermata dedicata (`dayReport.html`) accessibile ogni mattina tramite notifica, che riassume il percorso della giornata e le statistiche delle visite programmate con una timeline cronologica.
-
----
-
-## 📶 Tecnologia Offline-First (Outbox Pattern)
-ISFplan è progettata per il territorio. Grazie al modulo `offlineManager.js`:
-1.  **Persistenza Locale:** I dati vengono salvati in **IndexedDB** per la consultazione senza rete.
-2.  **Sync Queue:** Ogni azione (inserimento, nota, modifica) eseguita offline viene messa in coda.
-3.  **Sincronizzazione Automatica:** Al ritorno della connessione, il Service Worker svuota la coda verso Supabase in ordine cronologico, garantendo l'integrità dei dati.
-4.  **Notifiche Push Locali:** Avvisi automatici 15 minuti prima di una visita e briefing mattutino alle 07:00.
+### 6. Modalità Offline-First Intelligente
+*   L'app non si blocca se manca la connessione (es. dentro ospedali o ambulatori schermati).
+*   Le modifiche, le nuove visite e i task creati senza rete vengono salvati nella memoria del dispositivo.
+*   Un **LED indicatore** segnala lo stato della rete e sincronizza tutto automaticamente con il server Supabase non appena il telefono torna online.
 
 ---
 
 ## 🏗️ Setup e Installazione
 
 ### 1. Configurazione Database (Supabase SQL Editor)
-La struttura completa del database è definita nel file [`schema.sql`](./schema.sql).
-1. Accedi a [Supabase](https://supabase.com/).
-2. Vai nella sezione **SQL Editor**.
-3. Incolla il contenuto di `schema.sql`.
-4. **Importante:** Sostituisci `'YOUR_ADMIN_UID_HERE'` con il tuo UUID (sezione Authentication) per abilitare la God Mode.
-5. Esegui lo script per generare Tabelle, RLS e la Vista `medici_con_stato_visite`.
+La struttura completa del database è definita nel file [`schema.sql`](./schema.sql) presente nella root del progetto. 
 
-### 2. Configurazione Frontend
-Crea un file `config.js` nella root:
-```javascript
-const CONFIG = {
-    SUPABASE_URL: 'https://tuo-progetto.supabase.co',
-    SUPABASE_KEY: 'tua-chiave-anon-key'
-};
-```
+Per configurare il tuo ambiente su Supabase:
+1. Accedi alla tua Dashboard di [Supabase](https://supabase.com/).
+2. Vai nella sezione **SQL Editor** dal menu laterale.
+3. Copia l'intero contenuto del file `schema.sql` e incollalo nell'editor.
+4. **Importante:** Prima di eseguire, cerca nello script la riga relativa alla `God Mode` (Policy Developer) e sostituisci `'IL_TUO_USER_ID_AUTH'` con il tuo **UUID personale** (lo trovi in *Authentication > Users* nella tua dashboard).
+5. Clicca su **Run** per creare tabelle, relazioni, la Vista ottimizzata e le policy di sicurezza RLS.
 
-### 3. Avvio Locale
-Usa un server locale (es. **Live Server** per VS Code) per supportare i Moduli JS e i Service Worker.
+### 2. Configurazione Frontend (Protezione API)
+Per connettere l'app al database:
+1. Crea un file chiamato `config.js` nella root del progetto.
+2. Inserisci le tue credenziali Supabase:
+   ```javascript
+   const CONFIG = {
+       SUPABASE_URL: 'https://tuo-progetto.supabase.co',
+       SUPABASE_KEY: 'tua-chiave-anon-key'
+   };
+   ```
+
+### 3. Avvio e Sviluppo
+*   **Server Locale:** Poiché l'app utilizza moduli ES, Service Worker e `fetch` dinamico, è necessario utilizzare un server locale. Se usi VS Code, l'estensione **Live Server** è la scelta raccomandata.
+*   **Offline Support:** Il Service Worker (`sw.js`) si occuperà di cacheare le risorse statiche. Per testare l'offline, usa il pannello "Network > Throttling > Offline" negli strumenti sviluppatore del browser.
 
 ---
 
-## 📂 Struttura del Progetto
+## 📂 Struttura Cartelle
 ```text
 agendaOverpoweredISF/
-┣ icon/                  # Loghi e icone PWA
-┣ auth.js                # Login e gestione sessioni
-┣ config.js              # Credenziali API (GitIgnored)
-┣ script.js              # Motore Core e logica SPA
-┣ scriptProFeatures.js   # Funzioni avanzate (Jump to date, sync)
-┣ offlineManager.js      # Gestione IndexedDB e Outbox Queue
-┣ notificationManager.js # Motore notifiche push locali
-┣ dayReportManager.js    # Logica per il briefing quotidiano
-┣ pwaManager.js          # Registrazione e update SW
-┣ sw.js                  # Service Worker (Network-First Cache)
-┣ featuresDebug.js       # Strumenti di test per sviluppatori
-┣ index.html             # Dashboard Principale
-┣ login.html             # Portale Accesso
-┣ dayReport.html         # Cruscotto di riepilogo
-┣ modals.html            # Componenti UI caricati on-demand
-┣ style.css              # Design System core
-┣ styleProFeatures.css   # Stili specifici per moduli Premium
-┣ manifest.json          # Configurazione installazione PWA
-┗ schema.sql             # Definizione Database PostgreSQL
+┣ icon/             # Asset grafici e icone
+┣ config.js         # Credenziali API
+┣ auth.js           # Logica di autenticazione
+┣ script.js         # Core business logic
+┣ sw.js             # Service Worker (Caching)
+┣ offlineManager.js # Logica IndexedDB / Sync Queue
+┣ pwaManager.js     # Gestione update PWA
+┣ manifest.json     # Manifest per installazione app
+┣ index.html        # SPA Main Dashboard
+┣ login.html        # Pagina di autenticazione
+┣ modals.html       # Finestre modali caricate dinamicamente
+┣ style.css         # SaaS-style Design
+┗ schema.sql        # Setup Database PostgreSQL
 ```
 
 ---
@@ -155,4 +144,4 @@ Il codice è condiviso esclusivamente per scopi di studio e consultazione.
 *   ❌ **Vietato:** Commercializzazione, rivendita del software "as-is" o utilizzo del brand "ISFplan / Agenda Overpowered" per fini di lucro.
 
 ---
-*Creato con tanto ☕ e dedizione per l'efficienza sul campo.*
+*Creato con tanto ☕ da una necessità reale.*

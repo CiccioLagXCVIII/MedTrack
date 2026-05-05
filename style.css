@@ -43,7 +43,6 @@ body {
     position: relative;
     color: var(--text-main);
     overscroll-behavior-y: contain;
-    user-select: none;
 }
 
 /* BB Layout Bootstrap Overrides */
@@ -84,8 +83,21 @@ body {
 }
 
 input,
-textarea {
+textarea,
+.note-preview,
+.client-card h3,
+.task-title {
     user-select: text;
+}
+
+.bottom-nav,
+.nav-btn,
+.nav-btn-plus,
+.calendar-grid .day,
+.segmented-btn,
+.btn-action-main,
+.btn-small {
+    user-select: none;
 }
 
 

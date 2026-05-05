@@ -63,17 +63,24 @@ async function clearAppCache() {
 
             desc.innerText = message;
 
-            // Se preme "Elimina/Conferma"
-            confirmBtn.onclick = () => {
+            // Funzioni con auto-rimozione: dopo il click si eliminano da sole
+            // e ripristinano il comportamento originale degli altri modal
+            const onConfirm = () => {
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
                 closeModal('modal-confirm');
                 resolve(true);
             };
 
-            // Se preme "Annulla"
-            cancelBtn.onclick = () => {
+            const onCancel = () => {
+                confirmBtn.removeEventListener('click', onConfirm);
+                cancelBtn.removeEventListener('click', onCancel);
                 closeModal('modal-confirm');
                 resolve(false);
             };
+
+            confirmBtn.addEventListener('click', onConfirm);
+            cancelBtn.addEventListener('click', onCancel);
 
             openModal('modal-confirm');
         });
@@ -135,6 +142,7 @@ async function clearAppCache() {
             };
         } catch (err) {
             console.error("Impossibile Accedere Al Database Per La Pulizia:", err);
+            updateNetworkLED('online');
             openAlert("Impossibile Accedere Al Database Per La Pulizia.");
         }
     }

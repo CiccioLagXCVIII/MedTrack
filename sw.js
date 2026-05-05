@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ISFplan-v1.6.2';
+const CACHE_NAME = 'ISFplan-v1.6.4';
 
 const ASSETS_TO_CACHE = [
     './',
@@ -74,11 +74,12 @@ self.addEventListener('fetch', (event) => {
                     return networkResponse;
                 })
                 .catch(() => {
-                    // Se la rete fallisce (offline) e non era in cache, restituisci almeno l'index.html
                     if (event.request.mode === 'navigate') {
                         return caches.match('./index.html');
                     }
-                    return cachedResponse;
+                    // Per risorse non navigate non in cache, restituire Response vuota appropriata
+                    if (cachedResponse) return cachedResponse;
+                    return new Response('', { status: 408, statusText: 'Offline - Resource Not Cached' });
                 });
         })
     );

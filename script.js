@@ -61,7 +61,23 @@ function initApp() {
     console.log("%c🚀 ISFplan Avviata", "color: #bf4f8a; font-weight: bold; font-size: 14px;");
     document.getElementById('main-app').style.display = 'block';
     loadMonthDataFromSupabase(currentDate);
+
+    document.getElementById('clients-container').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const client = clientsList.find(c => c.id === id);
+        if (!client) return;
+
+        if (action === 'delete-client') askDeleteClient(id, client.name);
+        else if (action === 'edit-client') openEditClient(id);
+        else if (action === 'move-visit') openEditVisit(id);
+        else if (action === 'add-visit') openAddVisitModal(id);
+    });
 }
+
 // BB Setup Event Listener Per Contenitori Checkbox Orari
 function injectTimeSlotLogic() {
     const containers = ['available-days-checkboxes', 'modal-edit-days-checkboxes'];
@@ -170,51 +186,43 @@ async function executeDBAction(op, table, payload, matchCriteria = null) {
             const medicoIdx = clientsList.findIndex(c => c.id === payload.medico_id);
             const medico = medicoIdx !== -1 ? clientsList[medicoIdx] : null;
 
+            // 1. Aggiungo la nuova visita alla lista locale
+            const tempId = crypto.randomUUID();
             allVisits.push({
-                id: crypto.randomUUID(), // ID temporaneo 
-                dbId: crypto.randomUUID(),
+                id: tempId,    // ID temporaneo per UI
+                dbId: tempId,  // ID per database
                 medico_id: payload.medico_id,
                 data_visita: payload.data_visita,
                 ora_visita: payload.ora_visita,
                 note: payload.note || "",
                 is_walkin_done: payload.is_walkin_done || false,
-                medici: medico ? { nome: medico.name, citta: medico.city, cellulare: medico.phone, indirizzo: medico.address } : null
+                medici: medico ? {
+                    nome: medico.name,
+                    citta: medico.city,
+                    cellulare: medico.phone,
+                    indirizzo: medico.address
+                } : null
             });
             await saveToOfflineCache('visitsData', allVisits);
 
-            // Sincronizza Istantaneamente Stato Della Visita Nell'Anagrafica In RAM E Cache Offline
+            // 2. Sincronizzo istantaneamente lo stato della visita nell'Anagrafica (RAM e Cache)
             if (medicoIdx !== -1) {
                 const dataVisita = dayjs(payload.data_visita);
                 const today = dayjs().startOf('day');
 
                 if (dataVisita.isBefore(today) || dataVisita.isSame(today, 'day')) {
-                    // Se La Visita È Nel Passato O Oggi, Aggiorna lastVisit Se È Più Recente
+                    // Se la visita è nel passato o oggi, aggiorna lastVisit se è più recente
                     if (!clientsList[medicoIdx].lastVisit || dataVisita.isAfter(dayjs(clientsList[medicoIdx].lastVisit))) {
                         clientsList[medicoIdx].lastVisit = payload.data_visita;
                     }
                 } else {
-                    // Se la visita È Nel Futuro, Aggiorna nextVisit Se È Più Vicina
+                    // Se la visita è nel futuro, aggiorna nextVisit se è più vicina
                     if (!clientsList[medicoIdx].nextVisit || dataVisita.isBefore(dayjs(clientsList[medicoIdx].nextVisit))) {
                         clientsList[medicoIdx].nextVisit = payload.data_visita;
                     }
                 }
                 await saveToOfflineCache('clientsData', clientsList);
             }
-        }
-
-        if (op === 'INSERT' && table === 'visite') {
-            const medico = clientsList.find(c => c.id === payload.medico_id);
-            allVisits.push({
-                id: crypto.randomUUID(), // ID temporaneo 
-                dbId: crypto.randomUUID(),
-                medico_id: payload.medico_id,
-                data_visita: payload.data_visita,
-                ora_visita: payload.ora_visita,
-                note: payload.note || "",
-                is_walkin_done: payload.is_walkin_done || false,
-                medici: medico ? { nome: medico.name, citta: medico.city, cellulare: medico.phone, indirizzo: medico.address } : null
-            });
-            await saveToOfflineCache('visitsData', allVisits);
         }
 
         if (op === 'UPDATE' && table === 'medici' && matchCriteria?.id) {
@@ -319,8 +327,11 @@ async function loadMonthDataFromSupabase(targetDate) {
             lastNote: m.nota_ultima_visita
         }));
 
+        const { data: { user } } = await sb.auth.getUser();
+
         let { data: visite, error: visiteError } = await sb.from('visite')
             .select('*, medici(*)')
+            .eq('user_id', user.id)
             .gte('data_visita', startOfMonth)
             .lte('data_visita', endOfMonth);
         if (visiteError) throw visiteError;
@@ -632,7 +643,7 @@ function renderDayAppointments() {
                     <div class="text-secondary small mt-1"><i data-lucide="map-pin" style="width:12px; height:12px;"></i> ${escapeHTML(app.city)}</div>
                 </div>
             </div>
-            <div class="note-preview" onclick="editNote('${app.dbId}', \`${escapeHTML(app.note)}\`)">
+            <div class="note-preview" data-visit-id="${app.dbId}" data-note="${app.note ? app.note.replace(/"/g, '&quot;') : ''}" onclick="editNoteFromAttr(this)">
                 <i data-lucide="file-text" style="width:14px; height:14px;" class="me-1"></i> 
                 ${app.note ? escapeHTML(app.note) : 'Aggiungi Note Visita...'}
             </div>
@@ -687,19 +698,19 @@ function renderDayAppointments() {
         li.className = 'appointment-item shadow-sm';
 
         li.innerHTML = `
-    <div class="list-info mb-3">
-        <span class="fw-bold text-dark fs-5">${escapeHTML(w.name)}</span>
-        <div class="text-secondary small mt-1">
-            <i data-lucide="map-pin" style="width:12px; height:12px;"></i> ${escapeHTML(w.city)}
+        <div class="list-info mb-3">
+            <span class="fw-bold text-dark fs-5">${escapeHTML(w.name)}</span>
+            <div class="text-secondary small mt-1">
+                <i data-lucide="map-pin" style="width:12px; height:12px;"></i> ${escapeHTML(w.city)}
+            </div>
+            ${orarioInfoHtml}
         </div>
-        ${orarioInfoHtml}
-    </div>
-    <div class="action-buttons">
-        <button class="btn btn-success btn-action-main me-2" onclick="markWalkinDone('${w.id}')">
-            <i data-lucide="check-circle" style="width:14px; height:14px;" class="me-1"></i> Visita
-        </button>
-        <div class="d-flex gap-1">${actionPillsHtml}</div>
-    </div>`;
+        <div class="action-buttons">
+            <button class="btn btn-success btn-action-main me-2" onclick="markWalkinDone('${w.id}')">
+                <i data-lucide="check-circle" style="width:14px; height:14px;" class="me-1"></i> Visita
+            </button>
+            <div class="d-flex gap-1">${actionPillsHtml}</div>
+        </div>`;
         wUl.appendChild(li);
     });
 
@@ -750,9 +761,9 @@ async function addAppointment() {
 
     if (isNew) {
         // CC Creazione Nuovo Medico Tramite Acquisizione Dati Dal Form
-        const nome = document.getElementById('new-client-name').value.trim();
-        const citta = document.getElementById('new-client-city').value.trim();
-        const indirizzo = document.getElementById('new-client-address').value.trim();
+        const nome = toTitleCase(document.getElementById('new-client-name').value.trim());
+        const citta = toTitleCase(document.getElementById('new-client-city').value.trim());
+        const indirizzo = toTitleCase(document.getElementById('new-client-address').value.trim());
         const cellulare = document.getElementById('new-client-phone').value.trim();
         let spec = document.getElementById('new-client-spec').value;
 
@@ -817,13 +828,17 @@ async function addAppointment() {
             // DD Offline: Inserisco Manualmente L'Appuntamento Nella Vista
             if (!appointments[selectedDateISO]) appointments[selectedDateISO] = { scheduled: [] };
 
+            // Recupera l'UUID generato da executeDBAction offline (già in allVisits)
+            const lastAdded = allVisits[allVisits.length - 1];
+            const tempDbId = lastAdded ? (lastAdded.id || lastAdded.dbId) : crypto.randomUUID();
+
             appointments[selectedDateISO].scheduled.push({
                 id: clientId,
                 name: nomeMedico,
                 city: cittaMedico,
                 time: time,
                 note: "",
-                dbId: crypto.randomUUID(), // Genera Un ID Finto Per La Lista
+                dbId: tempDbId,
                 isWalkinDone: false
             });
 
@@ -920,7 +935,7 @@ async function confirmEditVisit() {
     const newDate = document.getElementById('edit-visit-date').value;
     const newTime = document.getElementById('edit-visit-time').value;
 
-    if (!newDate || !newTime) return openAlert("Inserisci una data e un orario validi.");
+    if (!newDate || !newTime) return openAlert("Inserisci Data E Ora Valide");
 
     // CC Aggiornamento Visita DIRETTAMENTE Nel Database
     // DD In questo modo non dipende dall'array locale "allVisits" (che contiene solo il mese corrente),
@@ -932,12 +947,24 @@ async function confirmEditVisit() {
     // Operatore ?. È Il Null Safe Di JS. Se response è null O undefined Non Genera Errore Ma Si Limita A Restituire undefined, Evitando Crash In Caso Di Problemi Di Connessione O Altri Errori
     if (response?.error) {
         return openAlert("Errore Durante Aggiornamento");
-    } else {
-        closeModal('modal-edit-visit');
-        // CC Imposto Flag Di Refresh
-        appState.calendarNeedsRefresh = true;
-        appState.clientsNeedsRefresh = true;
     }
+
+    closeModal('modal-edit-visit');
+    // CC Imposto Flag Di Refresh
+    appState.calendarNeedsRefresh = true;
+    appState.clientsNeedsRefresh = true;
+
+    // CC Scenario Offline: chiudo il modal e mostro conferma dopo che Bootstrap ha finito la transizione
+    if (!navigator.onLine) {
+        const modalEl = document.getElementById('modal-edit-visit');
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            openAlert("Spostamento Salvato In Locale. La Vista Si Aggiornerà Appena Torni Online.");
+        }, { once: true });
+        closeModal('modal-edit-visit');
+        return;
+    }
+
+    closeModal('modal-edit-visit');
 
     // CC Ricalcolo Vista SQL Per Aggiornare Le Card In Base Alle Nuove Date/Orari
     if (document.getElementById('clients-view').classList.contains('active')) {
@@ -984,27 +1011,32 @@ function editNote(visitId, currentNote) {
 
 // BB Eliminazione
 async function deleteApp(visitDbId) {
-    console.log("Click rilevato per ID:", visitDbId);
+    // console.log("Click rilevato per ID:", visitDbId);
     const desc = document.getElementById('modal-confirm-desc');
     const confirmBtn = document.getElementById('btn-execute-confirm');
 
-    desc.innerText = `Vuoi Cancellare Questo Appuntamento?`;
-    openModal('modal-confirm');
+    desc.textContent = `Vuoi Cancellare Questo Appuntamento?`;
 
-    confirmBtn.onclick = async () => {
+    // Stesso pattern di askDeleteClient: clone + once
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    newBtn.addEventListener('click', async () => {
         await executeDBAction('DELETE', 'visite', null, { id: visitDbId });
 
         // CC Imposto Flag Di Refresh
         appState.calendarNeedsRefresh = true;
         appState.clientsNeedsRefresh = true;
 
-        allVisits = allVisits.filter(v => v.dbId !== visitDbId);
+        allVisits = allVisits.filter(v => v.id !== visitDbId && v.dbId !== visitDbId);
         processVisitsForCalendar(); // Ricalcola la mappa
         renderDayAppointments();
         closeModal('modal-confirm');
         await loadMonthDataFromSupabase(currentDate);
         openDayView(selectedDateISO);
-    };
+    }, { once: true });
+
+    openModal('modal-confirm');
 }
 
 // ==========================================================================
@@ -1063,19 +1095,25 @@ function renderClients() {
 
             rigaUltimaVisita = `Ultima Visita: <strong>${dayjs(client.lastVisit).format('DD/MM/YY')}</strong>`;
             rigaGiorniTrascorsi = diff === 0 ? "Visitato Oggi" : (diff === 1 ? "Visitato Ieri" : `Trascorsi: <strong>${diff} Giorni</strong>`);
-            actionButton = `<button class="btn-small btn-undo" onclick="openEditVisit('${client.id}')"><i data-lucide="calendar-range" style="width:14px; height:14px; margin-right:5px;"></i> SPOSTA</button>`;
+            actionButton = `<button class="btn-small btn-undo" data-action="move-visit" data-id="${client.id}">
+                                <i data-lucide="calendar-range" style="width:14px; height:14px; margin-right:5px;"></i> SPOSTA
+                            </button>`;
 
         } else if (client.nextVisit) {
             borderClass = 'border-neutral';
             rigaUltimaVisita = `Ultima Visita: <strong>Mai</strong>`;
             rigaGiorniTrascorsi = `In Programma Per Il <strong>${dayjs(client.nextVisit).format('DD/MM/YY')}</strong>`;
-            actionButton = `<button class="btn-small btn-undo" onclick="openEditVisit('${client.id}')"><i data-lucide="calendar-range" style="width:14px; height:14px; margin-right:5px;"></i> SPOSTA</button>`;
+            actionButton = `<button class="btn-small btn-undo" data-action="move-visit" data-id="${client.id}">
+                                <i data-lucide="calendar-range" style="width:14px; height:14px; margin-right:5px;"></i> SPOSTA
+                            </button>`;
 
         } else {
             borderClass = 'border-neutral';
             rigaUltimaVisita = `Ultima Visita: <strong>Mai</strong>`;
             rigaGiorniTrascorsi = "Nessuna Visita Effettuata";
-            actionButton = `<button class="btn-small btn-done" onclick="openAddVisitModal('${client.id}')"><i data-lucide="plus-circle" style="width:14px; height:14px; margin-right:5px;"></i> VISITA</button>`;
+            actionButton = `<button class="btn-small btn-done" data-action="add-visit" data-id="${client.id}">
+                                <i data-lucide="plus-circle" style="width:14px; height:14px; margin-right:5px;"></i> VISITA
+                            </button>`;
         }
 
         const card = document.createElement('div');
@@ -1098,9 +1136,13 @@ function renderClients() {
             </div>
 
             <div class="card-actions">
-                <button class="btn-small btn-edit" onclick="openEditClient('${client.id}')"><i data-lucide="user-cog" style="width:14px; height:14px; margin-right:5px;"></i> PROFILO</button>
+                <button class="btn-small btn-edit" data-action="edit-client" data-id="${client.id}">
+                    <i data-lucide="user-cog" style="width:14px; height:14px; margin-right:5px;"></i> PROFILO
+                </button>
                 ${actionButton}
-                <button class="btn-small btn-delete" onclick="askDeleteClient('${client.id}', '${escapeHTML(client.name)}')"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+                <button class="btn-small btn-delete" data-action="delete-client" data-id="${client.id}">
+                    <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                </button>
             </div>`;
         container.appendChild(card);
     });
@@ -1109,11 +1151,17 @@ function renderClients() {
 }
 
 // BB Ricerca e Filtri
+let _searchDebounceTimer = null;
+
 function handleSearchInput() {
     const input = document.getElementById('search-client');
     const clearBtn = document.getElementById('clear-search-btn');
-    input.value.length > 0 ? clearBtn.classList.remove('d-none') : clearBtn.classList.add('d-none');
-    renderClients();
+    input.value.length > 0
+        ? clearBtn.classList.remove('d-none')
+        : clearBtn.classList.add('d-none');
+
+    clearTimeout(_searchDebounceTimer);
+    _searchDebounceTimer = setTimeout(() => renderClients(), 200); // 200ms debounce
 }
 
 function clearSearch() {
@@ -1143,12 +1191,12 @@ function resetAllFilters() {
 
 // BB Modifica Dati Medico
 async function confirmEditClient() {
-    const name = document.getElementById('modal-edit-name').value.trim();
-    const city = document.getElementById('modal-edit-city').value.trim();
+    const name = toTitleCase(document.getElementById('modal-edit-name').value.trim());
+    const city = toTitleCase(document.getElementById('modal-edit-city').value.trim());
     const phone = document.getElementById('modal-edit-phone').value.trim();
     const spec = document.getElementById('modal-edit-spec').value;
     const checkboxes = document.querySelectorAll('#modal-edit-days-checkboxes input:checked');
-    const days = collectTimeSlots('available-days-checkboxes');
+    const days = collectTimeSlots('modal-edit-days-checkboxes');
 
     if (!name) return openAlert("Il nome è obbligatorio.");
 
@@ -1170,9 +1218,12 @@ async function askDeleteClient(clientId, clientName) {
     const confirmBtn = document.getElementById('btn-execute-confirm');
 
     desc.innerText = `Sei Sicuro Di Voler Eliminare Il Medico "${clientName}"? Questa Operazione Eliminerà Anche Tutte Le Visite Collegate.`;
-    openModal('modal-confirm');
 
-    confirmBtn.onclick = async () => {
+    // Clona il bottone per azzerare TUTTI i listener precedenti
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    newBtn.addEventListener('click', async () => {
         // Esecuzione Eliminazione Tramite Router In Modo Che Gestisca Online/Offline
         await executeDBAction('DELETE', 'medici', null, { id: clientId });
 
@@ -1188,7 +1239,9 @@ async function askDeleteClient(clientId, clientName) {
         // Ricarica Lista
         await loadAllDataFromSupabase();
         openAlert("Medico Elimitato Con Successo!");
-    };
+    }, { once: true }); // once:true rimuove il listener dopo il primo click
+
+    openModal('modal-confirm');
 }
 
 // ==========================================================================
@@ -1449,9 +1502,12 @@ async function deleteTask(id) {
 
     // CC Modal Di Conferma Eliminazione
     desc.innerText = "Vuoi Eliminare Questa Attività? Questa Azione Non Può Essere Annullata.";
-    openModal('modal-confirm');
 
-    confirmBtn.onclick = async () => {
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    newBtn.addEventListener('click', async () => {
+
         // Esegui o metti in coda l'eliminazione
         await executeDBAction('DELETE', 'tasks', null, { id: id });
 
@@ -1468,7 +1524,9 @@ async function deleteTask(id) {
         appState.tasksNeedsRefresh = false;
         closeModal('modal-confirm');
         renderTasks();
-    };
+    }, { once: true });
+
+    openModal('modal-confirm');
 }
 
 // ==========================================================================
@@ -1516,7 +1574,10 @@ function openEditClient(clientId) {
     document.getElementById('modal-edit-spec').value = client.specialization || '';
     document.getElementById('modal-edit-phone').value = client.phone || '';
 
-    document.querySelectorAll('[id^="slot-modal-edit-days-checkboxes"]').forEach(el => el.remove());
+    document.querySelectorAll('#modal-edit-days-checkboxes input.btn-check').forEach(cb => {
+        cb.checked = false;
+    });
+    document.querySelectorAll('[id^="group-modal-edit-days-checkboxes"]').forEach(el => el.remove());
 
     if (client.giorni_liberi) {
         try {
@@ -1791,7 +1852,7 @@ function collectTimeSlots(containerId) {
 function resetForm() {
     document.querySelectorAll('#new-client-div input, #time-group input, #custom-spec-input').forEach(i => i.value = '');
     document.querySelectorAll('#available-days-checkboxes input').forEach(c => c.checked = false);
-    document.querySelectorAll('select.form-select').forEach(s => s.value = '');
+    document.querySelectorAll('#day-view select.form-select').forEach(s => s.value = '');
 
     const specSelect = document.getElementById('new-client-spec');
     const customInput = document.getElementById('custom-spec-input');
@@ -1826,9 +1887,25 @@ function updateNetworkLED(state) {
     }
 }
 
+// BB Title Case Con Supporto Apostrofo (Es: "d'antoni" → "D'Antoni")
+function toTitleCase(str) {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .replace(/(^|[\s\-'])(\w)/g, (_, sep, char) => sep + char.toUpperCase());
+}
+
+// BB Escape HTML Per Prevenire XSS
 function escapeHTML(str) {
     if (!str) return '';
-    return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t]));
+    return str.replace(/[&<>'"` ]/g, t => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;',
+        "'": '&#39;', '"': '&quot;', '`': '&#96;'
+    }[t] || t));
+}
+
+function editNoteFromAttr(el) {
+    editNote(el.dataset.visitId, el.dataset.note);
 }
 
 // BB Data Parsers
@@ -1845,4 +1922,4 @@ function parseDays(data) {
 function getDayLabel(id) {
     const labels = { "1": "Lun", "2": "Mar", "3": "Mer", "4": "Gio", "5": "Ven" };
     return labels[id] || "";
-}
+};

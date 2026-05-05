@@ -94,7 +94,7 @@ function scheduleAllTodayVisits(visits) {
 
     todayVisits.forEach(visit => {
         const visitId = visit.id || visit.dbId;
-        if (scheduledNotifications.has(visitId)) return;
+        if (!visitId || scheduledNotifications.has(visitId)) return;
 
         const visitDateTime = dayjs(`${visit.data_visita} ${visit.ora_visita}`);
         const prefMinutes = parseInt(localStorage.getItem('pref_notifyTime') || '15');
